@@ -4,6 +4,8 @@
     <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
 </a>
 
+# Natural Language and Multimodal Music Recommendation System
+
 An end-to-end Machine Learning project for personalized music recommendation using natural language queries and vector similarity matching.
 
 ## Project Overview
@@ -83,4 +85,3 @@ We use the **Spotify Dataset** sourced from Kaggle and enriched via the official
 ```
 
 --------
-
