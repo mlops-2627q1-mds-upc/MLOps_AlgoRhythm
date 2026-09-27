@@ -1,2 +1,4 @@
+[core]
+    remote = origin
 ['remote "origin"']
     url = https://dagshub.com/sergi.gonzalez.martos/MLOps_AlgoRhythm.dvc
