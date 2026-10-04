@@ -23,9 +23,9 @@ pipeline_tag: tabular-regression
 ## Model Details
 
 ### Model Description
-This model is part of an MLOps pipeline designed to predict the Spotify popularity score of a track (ranging from 0 to 100) based strictly on its audio characteristics and selected metadata, intentionally excluding artist identity and artist popularity to test the predictive power of track features.
+This model is part of an MLOps pipeline designed to predict the Spotify popularity score of a track (ranging from 0 to 100) based strictly on its audio characteristics and selected metadata, excluding artist identity and artist popularity to test the predictive power of track features.
 
-- **Developed by:** 
+- **Developed by:** Ana Martinez, Enikö Beke, Marta Sunyer, Ruddy Cuellar, and Sergi González.
 - **Model type:** Supervised Regression 
 - **Language(s):** English
 - **License:** MIT
@@ -40,13 +40,13 @@ This model is part of an MLOps pipeline designed to predict the Spotify populari
 
 ### Out-of-Scope Use
 - Predicting popularity on platforms other than Spotify.
-- Evaluating artist relevance or success, as artist metrics are explicitly excluded from the feature set.
+- Evaluating artist relevance or success as artist metrics are explicitly excluded from the feature set.
 
 ## Bias, Risks, and Limitations
 
-- **Exclusion of Artist Metadata:** By omitting artist and historical popularity, the model may underestimate songs whose success is heavily driven by artist fame.
-- **Historical Bias:** Popularity scores reflect Spotify's algorithmic preferences and listener habits at the time of data collection.
-- **Data Drift:** Changes in musical trends over time can degrade model performance. The system includes data drift monitoring to flag models for further investigation or retraining.
+- **Exclusion of Artist Metadata:** By omitting artist and historical popularity, the model may underestimate songs whose success is heavily based by artist fame.
+- **Historical Bias:** Popularity scores reflect Spotify's algorithmic preferences and habits of listeners ONLY at the time of data collection.
+- **Data Drift:** Changes in musical trends over time can affect model performance. The system includes data drift monitoring to flag models for further investigation or retraining.
 
 ## How to Get Started with the Model
 
@@ -76,3 +76,44 @@ sample_track = pd.DataFrame([{
 # Predict popularity score
 predicted_score = model.predict(sample_track)
 print(f"Predicted Spotify Popularity Score: {predicted_score[0]:.2f}")
+````
+
+## Training Details
+
+### Training Data
+- **Dataset:** Spotify Tracks Dataset.
+- **Target Variable:** `popularity` (Integer / Float score from 0 to 100 representing play count and recency).
+- **Features Used:**
+  - **Audio Features:** `danceability`, `energy`, `key`, `loudness`, `mode`, `speechiness`, `acousticness`, `instrumentalness`, `liveness`, `valence`, `tempo`, `duration_ms`, `time_signature`.
+  - **Metadata:** `explicit`, `track_genre`.
+- **Omitted Features:** `artists`, `album_name`, `track_name` 
+
+### Training Procedure
+- **Preprocessing:** Handling missing values and outliers, encoding categorical metadata (`track_genre`, `explicit`), and scaling numeric audio features.
+- **Pipeline:** Automated with DVC (`dvc.yaml`) for data cleaning, feature engineering, and training execution.
+- **Experiment Tracking:** Hyperparameters, parameters, and metrics are logged automatically to MLflow / DagsHub.
+
+---
+
+## Evaluation
+
+### Testing Data & Metrics
+- **MAE (Mean Absolute Error):** Interpretable metric showing the average popularity point deviation.
+- **RMSE (Root Mean Squared Error):** Penalizes larger prediction errors.
+- **R² Score:** Measures the proportion of variance explained by the model.
+
+### Model Results *(To be updated)*
+
+| Model | MAE | RMSE | R² |
+| :--- | :---: | :---: | :---: |
+| **Baseline (Linear Regression)** | `[PENDING]` | `[PENDING]` | `[PENDING]` |
+| **Best Model ([PENDING: Random Forest / Gradient Boosting])** | `[PENDING]` | `[PENDING]` | `[PENDING]` |
+
+### Operational Metrics
+- **Inference Latency:** `[PENDING: p. ej., ~15 ms]`
+- **Training Time:** `[PENDING: p. ej., 45 secs]`
+
+---
+
+## Monitoring and Maintenance
+- **Data Drift Detection:** Simulated using split dataset evaluation. Features exceeding defined drift thresholds trigger an automated flag for investigation or retraining.
