@@ -22,6 +22,7 @@ Usage:
 """
 
 from __future__ import annotations
+from src.config import RAW_DATA_DIR, INTERIM_DATA_DIR
 
 import argparse
 import logging
@@ -32,16 +33,11 @@ import pandas as pd
 
 BASE_DIR = Path(__file__).resolve().parent
 
-RAW_PATH = BASE_DIR / "../../data/raw/dataset.csv"
-OUTPUT_PATH = BASE_DIR / "../../data/interim/dataset_transformed.csv"
 
-# Stage 1 - EDA cleaning
 TARGET = "popularity"
 MISSING_DROP_THRESHOLD = 0.50   # drop columns with more than 50% missing values
 CATEGORICAL_MAX_UNIQUE = 15     # numeric columns with <= this many unique values are categorical
 SKEW_THRESHOLD = 1.0            # |skew| above this -> impute with median, otherwise mean
-
-# Stage 2 - Preprocessing
 Z_THRESHOLD = 3.0
 OUTLIER_COLS = ["duration_ms", "loudness", "speechiness"]
 COLS_TO_DROP = ["Unnamed: 0", "track_id", "artists", "album_name", "track_name"]
@@ -50,10 +46,10 @@ ONE_HOT_PREFIX = "genre"
 
 logger = logging.getLogger("preprocessing_pipeline")
 
-
-# Stage 1 - EDA cleaning
-def classify_variables(df: pd.DataFrame, target: str | None = TARGET, categorical_max_unique: int = CATEGORICAL_MAX_UNIQUE) -> tuple[list[str], list[str], list[str]]:
-    
+def classify_variables(df, target:str=TARGET, categorical_max_unique:int=CATEGORICAL_MAX_UNIQUE) -> tuple[list[str], list[str], list[str]]:
+    """
+    Classifies the dataframe columns in numerical and categorical.
+    """
     numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
     categorical_cols = df.select_dtypes(exclude=np.number).columns.tolist()
 
@@ -71,58 +67,82 @@ def classify_variables(df: pd.DataFrame, target: str | None = TARGET, categorica
     integer_cols = [c for c in numeric_cols if is_integer_valued(df[c])]
     return numeric_cols, categorical_cols, integer_cols
 
-
-def clean_missing_and_duplicates(df: pd.DataFrame, target: str | None = TARGET,  missing_drop_threshold: float = MISSING_DROP_THRESHOLD,
-    categorical_max_unique: int = CATEGORICAL_MAX_UNIQUE, skew_threshold: float = SKEW_THRESHOLD) -> pd.DataFrame:
-
-    numeric_cols, categorical_cols, integer_cols = classify_variables(df, target, categorical_max_unique)
-    missing_pct = df.isna().mean()
-
+def drop_duplicates(df) -> pd.DataFrame:
+    """
+    Given a dataframe, drops duplicated rows.
+    """
     # Duplicates (before imputing, so they are detected on the raw values)
     n_dup = int(df.duplicated().sum())
     logger.info("Fully duplicated rows: %d (%.2f%%)", n_dup, 100 * n_dup / max(len(df), 1))
     df = df.drop_duplicates().reset_index(drop=True)
     logger.info("Shape after removing duplicates: %s", df.shape)
+    
+    return df
 
-    # Drop columns that are mostly empty
+def drop_columns_not_informative(df: pd.DataFrame, cols:list[str] = COLS_TO_DROP) -> pd.DataFrame:
+    """
+    Given a dataframe and a list of columns with information not important for our problem to drop, drops those columns.
+    """
+    cols_present = [c for c in cols if c in df.columns]
+    df = df.drop(columns=cols, errors="ignore")
+    logger.info("Dropped columns: %s | shape: %s", cols_present, df.shape)
+    return df
+
+def drop_columns_empty(df, missing_drop_threshold:float=MISSING_DROP_THRESHOLD) -> pd.DataFrame:
+    """
+    Given a dataframe and a threshold, drops columns that have more missing values than the threshold.
+    """
+    missing_pct = df.isna().mean()
     cols_to_drop = missing_pct.index[missing_pct > missing_drop_threshold].tolist()
-    df_clean = df.drop(columns=cols_to_drop)
+    df = df.drop(columns=cols_to_drop)
     logger.info("Dropped columns (too many NaN): %s", cols_to_drop or "none")
+    return df
 
+def drop_rows_no_target(df, target:str=TARGET) -> pd.DataFrame:
+    """
+    Given a dataframe and the target, drops rows that have no value in target variable.
+    """
     # Never impute the target: rows without target are dropped
-    if target and target in df_clean.columns:
-        before = len(df_clean)
-        df_clean = df_clean.dropna(subset=[target])
-        logger.info("Rows dropped for missing target: %d", before - len(df_clean))
+    if target and target in df.columns:
+        before = len(df)
+        df = df.dropna(subset=[target])
+        logger.info("Rows dropped for missing target: %d", before - len(df))
+    return df
+    
 
-    # Impute the remaining columns
-    numeric_cols = [c for c in numeric_cols if c in df_clean.columns]
-    categorical_cols = [c for c in categorical_cols if c in df_clean.columns]
+def clean_missing(df, target:str=TARGET, categorical_max_unique:int = CATEGORICAL_MAX_UNIQUE, skew_threshold:float = SKEW_THRESHOLD) -> pd.DataFrame:
+    """
+    Given a dataframe, imputes missing data
+    """
+    numeric_cols, categorical_cols, integer_cols = classify_variables(df, target, categorical_max_unique)
 
-    for col in df_clean.columns:
-        if not df_clean[col].isna().any():
+    numeric_cols = [c for c in numeric_cols if c in df.columns]
+    categorical_cols = [c for c in categorical_cols if c in df.columns]
+
+    for col in df.columns:
+        if not df[col].isna().any(): # if there is no missing data
             continue
         if col in numeric_cols:
-            if abs(df_clean[col].skew()) > skew_threshold:
-                fill = df_clean[col].median()
+            if abs(df[col].skew()) > skew_threshold:
+                fill = df[col].median()
             else:
-                fill = df_clean[col].mean()
+                fill = df[col].mean()
             if col in integer_cols:
                 fill = round(fill)
             strategy = "median/mean"
         else:
-            fill = df_clean[col].mode().iloc[0]
+            fill = df[col].mode().iloc[0]
             strategy = "mode"
-        df_clean[col] = df_clean[col].fillna(fill)
+        df[col] = df[col].fillna(fill)
         logger.info("  %-20s imputed with %s: %s", col, strategy, fill)
 
-    logger.info("Remaining missing values: %d", int(df_clean.isna().sum().sum()))
-    return df_clean
+    logger.info("Remaining missing values: %d", int(df.isna().sum().sum()))
+    return df
 
-
-# Stage 2 - Preprocessing
-def remove_outliers(df: pd.DataFrame, cols: list[str] = OUTLIER_COLS, z_threshold: float = Z_THRESHOLD) -> pd.DataFrame:
-
+def remove_outliers(df, cols: list[str] = OUTLIER_COLS, z_threshold: float = Z_THRESHOLD) -> pd.DataFrame:
+    """
+    Given a dataframe removes rows that are outliers
+    """
     missing_cols = [c for c in cols if c not in df.columns]
     if missing_cols:
         raise KeyError(f"Outlier columns not found in the dataset: {missing_cols}")
@@ -142,15 +162,6 @@ def remove_outliers(df: pd.DataFrame, cols: list[str] = OUTLIER_COLS, z_threshol
     )
     return df
 
-
-def drop_columns(df: pd.DataFrame, cols: list[str] = COLS_TO_DROP) -> pd.DataFrame:
-
-    cols_present = [c for c in cols if c in df.columns]
-    df = df.drop(columns=cols, errors="ignore")
-    logger.info("Dropped columns: %s | shape: %s", cols_present, df.shape)
-    return df
-
-
 def one_hot_encode(df: pd.DataFrame, col: str = CATEGORICAL_COL, prefix: str = ONE_HOT_PREFIX) -> pd.DataFrame:
     
     if col not in df.columns:
@@ -159,7 +170,6 @@ def one_hot_encode(df: pd.DataFrame, col: str = CATEGORICAL_COL, prefix: str = O
     df = pd.get_dummies(df, columns=[col], prefix=prefix, dtype=int)
     logger.info("Categories encoded: %d | new shape: %s", n_categories, df.shape)
     return df
-
 
 def final_check(df: pd.DataFrame) -> None:
     
@@ -172,21 +182,22 @@ def final_check(df: pd.DataFrame) -> None:
 # Pipeline
 def run_pipeline() -> pd.DataFrame:
     
-    df = pd.read_csv(RAW_PATH)
+    df = pd.read_csv(RAW_DATA_DIR / "dataset.csv")
     logger.info("Loaded dataset: %s rows x %d columns", f"{df.shape[0]:,}", df.shape[1])
 
-    # --- Stage 1: EDA cleaning
-    df = clean_missing_and_duplicates(df)
-
-    # --- Stage 2: preprocessing
+    df = drop_duplicates(df)
+    
+    df = drop_columns_empty(df)
+    df = drop_rows_no_target(df)
+    df = clean_missing(df)
     df = remove_outliers(df)
-    df = drop_columns(df)
+    
+    df = drop_columns_not_informative(df)
     df = one_hot_encode(df)
     final_check(df)
 
-    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(OUTPUT_PATH, index=False)
-    logger.info("Preprocessed dataset saved to %s", OUTPUT_PATH)
+    df.to_csv(INTERIM_DATA_DIR / "dataset_transformed.csv", index=False)
+    logger.info("Preprocessed dataset saved to %s", INTERIM_DATA_DIR / "dataset_transformed.csv")
     return df
 
 
