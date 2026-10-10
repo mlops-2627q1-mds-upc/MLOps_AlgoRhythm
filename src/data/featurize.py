@@ -4,13 +4,13 @@ import yaml
 from loguru import logger
 from pathlib import Path
 import sys
-from src.config import TRAIN_FILE, VAL_FILE, TEST_FILE
+from src.config import TRAIN_FILE, TEST_FILE
 
 
-
-def classify_variables(df, target:str, categorical_max_unique:int) -> tuple[list[str], list[str], list[str]]:
+def classify_variables(df, target: str, categorical_max_unique: int) -> tuple[list[str], list[str], list[str]]:
     """
     Classifies the dataframe columns in numerical and categorical.
+    Must be called on the training set only.
     """
     numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
     categorical_cols = df.select_dtypes(exclude=np.number).columns.tolist()
@@ -30,65 +30,65 @@ def classify_variables(df, target:str, categorical_max_unique:int) -> tuple[list
     return numeric_cols, categorical_cols, integer_cols
 
 
-def clean_missing(df, target:str, categorical_max_unique:int, skew_threshold:float) -> pd.DataFrame:
+def fit_imputer(train_df: pd.DataFrame, target: str, categorical_max_unique: int,
+                skew_threshold: float) -> dict:
     """
-    Given a dataframe, imputes missing data
+    Learns the fill value of every column using the training set only
+    (median/mean for numeric columns, mode for categorical ones).
+    Returns a {column: fill_value} dict.
     """
-    numeric_cols, categorical_cols, integer_cols = classify_variables(df, target, categorical_max_unique)
+    numeric_cols, categorical_cols, integer_cols = classify_variables(
+        train_df, target, categorical_max_unique
+    )
 
-    numeric_cols = [c for c in numeric_cols if c in df.columns]
-    categorical_cols = [c for c in categorical_cols if c in df.columns]
-
-    for col in df.columns:
-        if not df[col].isna().any(): # if there is no missing data
+    fill_values = {}
+    for col in numeric_cols + categorical_cols:
+        if train_df[col].isna().all():
+            logger.warning("Column {} is entirely missing in train; skipping", col)
             continue
+
         if col in numeric_cols:
-            if abs(df[col].skew()) > skew_threshold:
-                fill = df[col].median()
+            if abs(train_df[col].skew()) > skew_threshold:
+                fill, strategy = train_df[col].median(), "median"
             else:
-                fill = df[col].mean()
+                fill, strategy = train_df[col].mean(), "mean"
             if col in integer_cols:
                 fill = round(fill)
-            strategy = "median/mean"
         else:
-            fill = df[col].mode().iloc[0]
-            strategy = "mode"
-        df[col] = df[col].fillna(fill)
-        logger.info("  %-20s imputed with %s: %s", col, strategy, fill)
+            fill, strategy = train_df[col].mode().iloc[0], "mode"
 
-    logger.info("Remaining missing values: %d", int(df.isna().sum().sum()))
+        fill_values[col] = fill
+        if train_df[col].isna().any():
+            logger.info("{:<20} will be imputed with {}: {}", col, strategy, fill)
+
+    return fill_values
+
+
+def apply_imputer(df: pd.DataFrame, fill_values: dict, name: str) -> pd.DataFrame:
+    """
+    Imputes missing values using the fill values learned on train.
+    """
+    df = df.copy().fillna(value=fill_values)
+    logger.info("[{}] Remaining missing values: {}", name, int(df.isna().sum().sum()))
     return df
 
-def remove_outliers(df, cols: list[str], z_threshold: float) -> pd.DataFrame:
+
+def one_hot_encode(df: pd.DataFrame, col: str, prefix: str, categories: list, name: str) -> pd.DataFrame:
     """
-    Given a dataframe removes rows that are outliers
+    One-hot encodes `col` using a fixed list of categories (learned on train),
+    so train and test end up with exactly the same columns in the same order.
     """
-    missing_cols = [c for c in cols if c not in df.columns]
-    if missing_cols:
-        raise KeyError(f"Outlier columns not found in the dataset: {missing_cols}")
-
-    z_scores = (df[cols] - df[cols].mean()) / df[cols].std()
-    is_outlier = z_scores.abs() > z_threshold
-
-    logger.info("Outliers per variable:\n%s", is_outlier.sum().to_string())
-
-    rows_to_remove = is_outlier.any(axis=1)
-    rows_before = len(df)
-    df = df.loc[~rows_to_remove].reset_index(drop=True)
-    logger.info(
-        "Rows before: %s | removed: %s (%.2f%%) | after: %s",
-        f"{rows_before:,}", f"{int(rows_to_remove.sum()):,}",
-        100 * rows_to_remove.mean(), f"{len(df):,}",
-    )
-    return df
-
-def one_hot_encode(df: pd.DataFrame, col: str, prefix: str) -> pd.DataFrame:
-    
     if col not in df.columns:
         raise KeyError(f"Categorical column '{col}' not found in the dataset")
-    n_categories = df[col].nunique()
+
+    n_unseen = int((~df[col].isin(categories) & df[col].notna()).sum())
+    if n_unseen:
+        logger.warning("[{}] {} rows with categories not present in train (encoded as all zeros)", name, n_unseen)
+
+    df = df.copy()
+    df[col] = pd.Categorical(df[col], categories=categories)
     df = pd.get_dummies(df, columns=[col], prefix=prefix, dtype=int)
-    logger.info("Categories encoded: %d | new shape: %s", n_categories, df.shape)
+    logger.info("[{}] Categories encoded: {} | new shape: {}", name, len(categories), df.shape)
     return df
 
 
@@ -97,30 +97,39 @@ def main():
     if len(sys.argv) != 3:
         logger.error("Arguments error. Usage: \tpython featurize.py <input_folder_path> <output_folder_path>\n")
         sys.exit(1)
-            
+
     input_folder_path = Path(sys.argv[1])
     output_folder_path = Path(sys.argv[2])
     output_folder_path.mkdir(parents=True, exist_ok=True)
-    
+
     # Load parameters
-    params = yaml.safe_load(open("params.yaml"))
+    with open("params.yaml") as f:
+        params = yaml.safe_load(f)
     target = params["global"]["target"]
     categorical_max_unique = params["featurize"]["categorical_max_unique"]
     skew_threshold = params["featurize"]["skew_threshold"]
-    outlier_cols = params["featurize"]["outlier_cols"]
-    z_threshold = params["featurize"]["z_threshold"]
     categorical_col = params["featurize"]["categorical_col"]
     one_hot_prefix = params["featurize"]["one_hot_prefix"]
-    
-    # Load dataset
+
+    # Load datasets
     train_df = pd.read_csv(input_folder_path / TRAIN_FILE)
-    val_df = pd.read_csv(input_folder_path / VAL_FILE)
     test_df = pd.read_csv(input_folder_path / TEST_FILE)
-    
-    df = clean_missing(df, target, categorical_max_unique, skew_threshold)
-    df = remove_outliers(df, outlier_cols, z_threshold)
-    df = one_hot_encode(df, categorical_col, one_hot_prefix)
-    
-    
+
+    # 1. Missing values: fit on train, apply to train and test
+    fill_values = fit_imputer(train_df, target, categorical_max_unique, skew_threshold)
+    train_df = apply_imputer(train_df, fill_values, "train")
+    test_df = apply_imputer(test_df, fill_values, "test")
+
+    # 2. One-hot encoding of categorical_col in train and test (categories taken from train)
+    categories = sorted(train_df[categorical_col].dropna().unique())
+    train_df = one_hot_encode(train_df, categorical_col, one_hot_prefix, categories, "train")
+    test_df = one_hot_encode(test_df, categorical_col, one_hot_prefix, categories, "test")
+
+    # Save
+    train_df.to_csv(output_folder_path / TRAIN_FILE, index=False)
+    test_df.to_csv(output_folder_path / TEST_FILE, index=False)
+    logger.info("Featurized datasets saved to {}", output_folder_path)
+
+
 if __name__ == "__main__":
-    main() 
+    main()

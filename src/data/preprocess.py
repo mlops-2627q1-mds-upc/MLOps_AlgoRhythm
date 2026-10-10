@@ -39,6 +39,7 @@ def drop_duplicates(df) -> pd.DataFrame:
     
     return df
 
+
 def drop_columns_empty(df, missing_drop_threshold:float) -> pd.DataFrame:
     """
     Given a dataframe and a threshold, drops columns that have more missing values than the threshold.
@@ -48,6 +49,7 @@ def drop_columns_empty(df, missing_drop_threshold:float) -> pd.DataFrame:
     df = df.drop(columns=cols_to_drop)
     logger.info("Dropped columns (too many NaN): {}", cols_to_drop or "none")
     return df
+
 
 def drop_rows_no_target(df, target:str) -> pd.DataFrame:
     """
@@ -60,6 +62,7 @@ def drop_rows_no_target(df, target:str) -> pd.DataFrame:
         logger.info("Rows dropped for missing target: {}", before - len(df))
     return df
 
+
 def drop_columns_not_informative(df: pd.DataFrame, cols:list[str]) -> pd.DataFrame:
     """
     Given a dataframe and a list of columns with information not important for our problem to drop, drops those columns.
@@ -67,6 +70,30 @@ def drop_columns_not_informative(df: pd.DataFrame, cols:list[str]) -> pd.DataFra
     cols_present = [c for c in cols if c in df.columns]
     df = df.drop(columns=cols, errors="ignore")
     logger.info("Dropped columns: {} | shape: {}", cols_present, df.shape)
+    return df
+
+
+def remove_outliers(df, cols: list[str], z_threshold: float) -> pd.DataFrame:
+    """
+    Given a dataframe removes rows that are outliers
+    """
+    missing_cols = [c for c in cols if c not in df.columns]
+    if missing_cols:
+        raise KeyError(f"Outlier columns not found in the dataset: {missing_cols}")
+
+    z_scores = (df[cols] - df[cols].mean()) / df[cols].std()
+    is_outlier = z_scores.abs() > z_threshold
+
+    logger.info("Outliers per variable:\n%s", is_outlier.sum().to_string())
+
+    rows_to_remove = is_outlier.any(axis=1)
+    rows_before = len(df)
+    df = df.loc[~rows_to_remove].reset_index(drop=True)
+    logger.info(
+        "Rows before: %s | removed: %s (%.2f%%) | after: %s",
+        f"{rows_before:,}", f"{int(rows_to_remove.sum()):,}",
+        100 * rows_to_remove.mean(), f"{len(df):,}",
+    )
     return df
 
 
@@ -82,6 +109,8 @@ def main():
     # Load parameters
     params = yaml.safe_load(open("params.yaml"))
     target = params["global"]["target"]
+    outlier_cols = params["featurize"]["outlier_cols"]
+    z_threshold = params["featurize"]["z_threshold"]
     missing_drop_threshold = params["clean-data"]["missing_drop_threshold"]
     cols_to_drop = params["clean-data"]["cols_to_drop"]
     
@@ -94,6 +123,7 @@ def main():
     df = drop_columns_empty(df, missing_drop_threshold)
     df = drop_rows_no_target(df, target)
     df = drop_columns_not_informative(df, cols_to_drop)
+    df = remove_outliers(df, outlier_cols, z_threshold)
 
     # Save dataset
     df.to_csv(output_path, index=False)
