@@ -102,10 +102,12 @@ def main(
         mlflow.log_metric("rmse", rmse)
         mlflow.log_metric("r2", r2)
 
-        # Log trained model to MLflow
+        # Log trained model to MLflow and register it in the Model Registry
+        # description
         mlflow.sklearn.log_model(
-            model,
+            sk_model=model,
             name="model",
+            registered_model_name="spotify_popularity_rf", 
             skops_trusted_types=["sklearn.tree._tree.Tree"],
         )
         logger.info(f"MLflow run ID: {run.info.run_id}")
