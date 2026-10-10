@@ -21,13 +21,10 @@ Usage:
         --output-path data/processed/dataset_preprocessed.csv
 """
 
-from __future__ import annotations
-from src.config import RAW_DATA_DIR, INTERIM_DATA_DIR
-
 from loguru import logger
-from pathlib import Path
 import pandas as pd
 import yaml
+import sys
 
 
 def drop_duplicates(df) -> pd.DataFrame:
@@ -36,9 +33,9 @@ def drop_duplicates(df) -> pd.DataFrame:
     """
     # Duplicates (before imputing, so they are detected on the raw values)
     n_dup = int(df.duplicated().sum())
-    logger.info("Fully duplicated rows: %d (%.2f%%)", n_dup, 100 * n_dup / max(len(df), 1))
+    logger.info("Fully duplicated rows: {}", n_dup, 100 * n_dup / max(len(df), 1))
     df = df.drop_duplicates().reset_index(drop=True)
-    logger.info("Shape after removing duplicates: %s", df.shape)
+    logger.info("Shape after removing duplicates: {}", df.shape)
     
     return df
 
@@ -49,7 +46,7 @@ def drop_columns_empty(df, missing_drop_threshold:float) -> pd.DataFrame:
     missing_pct = df.isna().mean()
     cols_to_drop = missing_pct.index[missing_pct > missing_drop_threshold].tolist()
     df = df.drop(columns=cols_to_drop)
-    logger.info("Dropped columns (too many NaN): %s", cols_to_drop or "none")
+    logger.info("Dropped columns (too many NaN): {}", cols_to_drop or "none")
     return df
 
 def drop_rows_no_target(df, target:str) -> pd.DataFrame:
@@ -60,7 +57,7 @@ def drop_rows_no_target(df, target:str) -> pd.DataFrame:
     if target and target in df.columns:
         before = len(df)
         df = df.dropna(subset=[target])
-        logger.info("Rows dropped for missing target: %d", before - len(df))
+        logger.info("Rows dropped for missing target: {}", before - len(df))
     return df
 
 def drop_columns_not_informative(df: pd.DataFrame, cols:list[str]) -> pd.DataFrame:
@@ -69,28 +66,38 @@ def drop_columns_not_informative(df: pd.DataFrame, cols:list[str]) -> pd.DataFra
     """
     cols_present = [c for c in cols if c in df.columns]
     df = df.drop(columns=cols, errors="ignore")
-    logger.info("Dropped columns: %s | shape: %s", cols_present, df.shape)
+    logger.info("Dropped columns: {} | shape: {}", cols_present, df.shape)
     return df
 
 
 def main():
+    # Validate arguments
+    if len(sys.argv) != 3:
+        logger.error("Arguments error. Usage: \tpython preprocess.py <input_path> <output_path>\n")
+        sys.exit(1)
+        
+    input_path = sys.argv[1]
+    output_path = sys.argv[2]
     
+    # Load parameters
     params = yaml.safe_load(open("params.yaml"))
     target = params["global"]["target"]
     missing_drop_threshold = params["clean-data"]["missing_drop_threshold"]
     cols_to_drop = params["clean-data"]["cols_to_drop"]
     
-    
-    df = pd.read_csv(RAW_DATA_DIR / "dataset.csv")
-    logger.info("Loaded dataset: %s rows x %d columns", f"{df.shape[0]:,}", df.shape[1])
+    # Load dataset
+    df = pd.read_csv(input_path)
+    logger.info("Loaded dataset from {}: {} rows x {} columns", input_path, f"{df.shape[0]:,}", df.shape[1])
 
+    # Apply transformations
     df = drop_duplicates(df)
     df = drop_columns_empty(df, missing_drop_threshold)
     df = drop_rows_no_target(df, target)
     df = drop_columns_not_informative(df, cols_to_drop)
 
-    df.to_csv(INTERIM_DATA_DIR / "dataset_transformed.csv", index=False)
-    logger.info("Preprocessed dataset saved to %s", INTERIM_DATA_DIR / "dataset_transformed.csv")
+    # Save dataset
+    df.to_csv(output_path, index=False)
+    logger.info("Preprocessed dataset saved to {}", output_path)
 
 
 if __name__ == "__main__":

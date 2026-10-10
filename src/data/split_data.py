@@ -1,29 +1,51 @@
 import pandas as pd
+import sys
+import yaml
 from loguru import logger
+from pathlib import Path
 from sklearn.model_selection import train_test_split
-from src.config import INTERIM_DATA_DIR, SEED, TRAIN_SPLIT, VALIDATION_SPLIT, TEST_SPLIT 
+from src.config import TRAIN_FILE, VAL_FILE, TEST_FILE
 
-def split_data():
+def main():
     """
     Splits preprocesed data into train, validation and test sets and save them to the 'data/interim' directory.
     """
-    df = df = pd.read_csv(INTERIM_DATA_DIR / "dataset_preprocessed.csv")
+    # Validate arguments
+    if len(sys.argv) != 3:
+        logger.error("Arguments error. Usage: \tpython split_data.py <input_path> <output_folder_path>\n")
+        sys.exit(1)
+        
+    input_path = Path(sys.argv[1])
+    output_folder_path = Path(sys.argv[2])
+    output_folder_path.mkdir(parents=True, exist_ok=True)
     
-    train_val_df, test_df = train_test_split(df, test_size=TEST_SPLIT, random_state=SEED)
+    # Load parameters
+    params = yaml.safe_load(open("params.yaml"))
+    seed = params["global"]["seed"]
+    train_split = params["split-data"]["train_split"]
+    validation_split = params["split-data"]["validation_split"]
+    test_split = params["split-data"]["test_split"]
     
-    val_ratio_relative = VALIDATION_SPLIT / (1 - TEST_SPLIT)
-    train_df, val_df = train_test_split(train_val_df, test_size=val_ratio_relative,random_state=SEED)
+    # Load dataset
+    df = pd.read_csv(input_path)
     
-    train_df.to_csv(INTERIM_DATA_DIR / "train.csv", index=False)
-    val_df.to_csv(INTERIM_DATA_DIR / "validation.csv", index=False)
-    test_df.to_csv(INTERIM_DATA_DIR / "test.csv", index=False)
+    # Split data
+    train_val_df, test_df = train_test_split(df, test_size=test_split, random_state=seed)
+    
+    val_ratio_relative = validation_split / (1 - test_split)
+    train_df, val_df = train_test_split(train_val_df, test_size=val_ratio_relative,random_state=seed)
+    
+    # Save datasets
+    train_df.to_csv(output_folder_path / TRAIN_FILE, index=False)
+    val_df.to_csv(output_folder_path / VAL_FILE, index=False)
+    test_df.to_csv(output_folder_path / TEST_FILE, index=False)
     
     logger.info(
-    f"Data split completed -> Train: {len(train_df):,} ({TRAIN_SPLIT})| "
-    f"Val: {len(val_df):,} ({VALIDATION_SPLIT}) | Test: {len(test_df):,} ({TEST_SPLIT})"
+    f"Data split completed -> Train: {len(train_df):,} ({train_split})| "
+    f"Val: {len(val_df):,} ({validation_split}) | Test: {len(test_df):,} ({test_split})"
     f"(Total: {len(df):,} samples)")
     
 if __name__ == "__main__":
-    split_data()
+    main()
     
     

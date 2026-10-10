@@ -20,6 +20,7 @@ dependencies = [
     "dvc>=3.67.1",
     "loguru>=0.7.3",
     "pandas>=3.0.6",
+    "scikit-learn>=1.9.1",
 ]
 
 

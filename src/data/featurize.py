@@ -2,7 +2,9 @@ import pandas as pd
 import numpy as np
 import yaml
 from loguru import logger
-from src.config import INTERIM_DATA_DIR, PROCESSED_DATA_DIR
+from pathlib import Path
+import sys
+from src.config import TRAIN_FILE, VAL_FILE, TEST_FILE
 
 
 
@@ -91,6 +93,16 @@ def one_hot_encode(df: pd.DataFrame, col: str, prefix: str) -> pd.DataFrame:
 
 
 def main():
+    # Validate arguments
+    if len(sys.argv) != 3:
+        logger.error("Arguments error. Usage: \tpython featurize.py <input_folder_path> <output_folder_path>\n")
+        sys.exit(1)
+            
+    input_folder_path = Path(sys.argv[1])
+    output_folder_path = Path(sys.argv[2])
+    output_folder_path.mkdir(parents=True, exist_ok=True)
+    
+    # Load parameters
     params = yaml.safe_load(open("params.yaml"))
     target = params["global"]["target"]
     categorical_max_unique = params["featurize"]["categorical_max_unique"]
@@ -99,6 +111,11 @@ def main():
     z_threshold = params["featurize"]["z_threshold"]
     categorical_col = params["featurize"]["categorical_col"]
     one_hot_prefix = params["featurize"]["one_hot_prefix"]
+    
+    # Load dataset
+    train_df = pd.read_csv(input_folder_path / TRAIN_FILE)
+    val_df = pd.read_csv(input_folder_path / VAL_FILE)
+    test_df = pd.read_csv(input_folder_path / TEST_FILE)
     
     df = clean_missing(df, target, categorical_max_unique, skew_threshold)
     df = remove_outliers(df, outlier_cols, z_threshold)
