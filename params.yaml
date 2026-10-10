@@ -2,19 +2,18 @@ global:
   target: "popularity"
   seed: 0
 
-clean-data:
+preprocess:
   cols_to_drop: ["Unnamed: 0", "track_id", "artists", "album_name", "track_name"]
   missing_drop_threshold: 0.50 
+  outlier_cols: ["duration_ms", "loudness", "speechiness"]
+  z_threshold: 3.0
 
 split-data:
   train_split: 0.7
-  validation_split: 0.2
-  test_split: 0.1
+  test_split: 0.3
 
 featurize:
   categorical_max_unique: 15
   skew_threshold: 1.0
-  outlier_cols: ["duration_ms", "loudness", "speechiness"]
-  z_threshold: 3.0
   categorical_col: "track_genre"
   one_hot_prefix: "genre"

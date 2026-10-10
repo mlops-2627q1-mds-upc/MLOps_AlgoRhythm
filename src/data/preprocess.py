@@ -109,10 +109,10 @@ def main():
     # Load parameters
     params = yaml.safe_load(open("params.yaml"))
     target = params["global"]["target"]
-    outlier_cols = params["featurize"]["outlier_cols"]
-    z_threshold = params["featurize"]["z_threshold"]
-    missing_drop_threshold = params["clean-data"]["missing_drop_threshold"]
-    cols_to_drop = params["clean-data"]["cols_to_drop"]
+    outlier_cols = params["preprocess"]["outlier_cols"]
+    z_threshold = params["preprocess"]["z_threshold"]
+    missing_drop_threshold = params["preprocess"]["missing_drop_threshold"]
+    cols_to_drop = params["preprocess"]["cols_to_drop"]
     
     # Load dataset
     df = pd.read_csv(input_path)

@@ -1,0 +1,103 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python src/data/preprocess.py data/raw/dataset.csv 
+      data/interim/dataset_preprocessed.csv
+    deps:
+    - path: data/raw/dataset.csv
+      hash: md5
+      md5: e50a70711e823b75c8ebe231468f5faf
+      size: 20118244
+      isexec: true
+    - path: src/data/preprocess.py
+      hash: md5
+      md5: 3561e8443fa20669e4f0bd30d23e03da
+      size: 4694
+      isexec: true
+    params:
+      params.yaml:
+        global.target: popularity
+        preprocess.cols_to_drop:
+        - 'Unnamed: 0'
+        - track_id
+        - artists
+        - album_name
+        - track_name
+        preprocess.missing_drop_threshold: 0.5
+        preprocess.outlier_cols:
+        - duration_ms
+        - loudness
+        - speechiness
+        preprocess.z_threshold: 3.0
+    outs:
+    - path: data/interim/dataset_preprocessed.csv
+      hash: md5
+      md5: 3891d61a5e078e3b4e78d593c24fcb2c
+      size: 9591805
+      isexec: true
+  split-data:
+    cmd: python src/data/split_data.py data/interim/dataset_preprocessed.csv 
+      data/interim
+    deps:
+    - path: data/interim/dataset_preprocessed.csv
+      hash: md5
+      md5: 3891d61a5e078e3b4e78d593c24fcb2c
+      size: 9591805
+      isexec: true
+    - path: src/data/split_data.py
+      hash: md5
+      md5: 0607794356c7f51622dcc19a8dc8439e
+      size: 1481
+      isexec: true
+    params:
+      params.yaml:
+        global.seed: 0
+        split-data.test_split: 0.3
+        split-data.train_split: 0.7
+    outs:
+    - path: data/interim/test.csv
+      hash: md5
+      md5: cc923d4d740eaf2c20176849ed4dff95
+      size: 2877926
+      isexec: true
+    - path: data/interim/train.csv
+      hash: md5
+      md5: 15792926a626deaee4766f2b663a33e8
+      size: 6714041
+      isexec: true
+  featurize:
+    cmd: python src/data/featurize.py data/interim data/processed
+    deps:
+    - path: data/interim/test.csv
+      hash: md5
+      md5: cc923d4d740eaf2c20176849ed4dff95
+      size: 2877926
+      isexec: true
+    - path: data/interim/train.csv
+      hash: md5
+      md5: 15792926a626deaee4766f2b663a33e8
+      size: 6714041
+      isexec: true
+    - path: src/data/featurize.py
+      hash: md5
+      md5: a9aec615eef4cda9891baad45674f5d7
+      size: 5213
+      isexec: true
+    params:
+      params.yaml:
+        featurize.categorical_col: track_genre
+        featurize.categorical_max_unique: 15
+        featurize.one_hot_prefix: genre
+        featurize.skew_threshold: 1.0
+        global.target: popularity
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: bceba32da77b82c9afc5ddc2067dc02f
+      size: 10047125
+      isexec: true
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 066c0a242d3d7de55a2ee2a9dc538515
+      size: 23440561
+      isexec: true

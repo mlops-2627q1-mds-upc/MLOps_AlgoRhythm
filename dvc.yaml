@@ -1,0 +1,43 @@
+stages:
+  preprocess:
+    cmd: python src/data/preprocess.py data/raw/dataset.csv 
+      data/interim/dataset_preprocessed.csv
+    deps:
+    - data/raw/dataset.csv
+    - src/data/preprocess.py
+    params:
+    - preprocess.cols_to_drop
+    - preprocess.missing_drop_threshold
+    - preprocess.outlier_cols
+    - preprocess.z_threshold
+    - global.target
+    outs:
+    - data/interim/dataset_preprocessed.csv
+  split-data:
+    cmd: python src/data/split_data.py data/interim/dataset_preprocessed.csv 
+      data/interim
+    deps:
+    - data/interim/dataset_preprocessed.csv
+    - src/data/split_data.py
+    params:
+    - global.seed
+    - split-data.test_split
+    - split-data.train_split
+    outs:
+    - data/interim/test.csv
+    - data/interim/train.csv
+  featurize:
+    cmd: python src/data/featurize.py data/interim data/processed
+    deps:
+    - data/interim/test.csv
+    - data/interim/train.csv
+    - src/data/featurize.py
+    params:
+    - featurize.categorical_col
+    - featurize.categorical_max_unique
+    - featurize.one_hot_prefix
+    - featurize.skew_threshold
+    - global.target
+    outs:
+    - data/processed/test.csv
+    - data/processed/train.csv
