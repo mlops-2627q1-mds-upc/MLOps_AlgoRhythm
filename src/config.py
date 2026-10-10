@@ -21,11 +21,6 @@ MODELS_DIR = PROJ_ROOT / "models"
 REPORTS_DIR = PROJ_ROOT / "reports"
 FIGURES_DIR = REPORTS_DIR / "figures"
 
-SEED = 0
-TRAIN_SPLIT = 0.7
-VALIDATION_SPLIT = 0.2
-TEST_SPLIT = 0.1
-
 # If tqdm is installed, configure loguru with tqdm.write
 # https://github.com/Delgan/loguru/issues/135
 try:
