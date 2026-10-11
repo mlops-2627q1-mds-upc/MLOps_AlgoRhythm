@@ -4,46 +4,34 @@ import mlflow
 import mlflow.sklearn
 import numpy as np
 import pandas as pd
+import yaml
 
 from pathlib import Path
 from loguru import logger
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.model_selection import train_test_split
 
-from src.config import MODELS_DIR, PROCESSED_DATA_DIR
+from src.config import MODELS_DIR, PROCESSED_DATA_DIR, TRAIN_FILE, TEST_FILE
 
-DATA_PATH = PROCESSED_DATA_DIR / "dataset_transformed.csv"
+
+DATA_PATH = PROCESSED_DATA_DIR
 MODEL_PATH = MODELS_DIR / "random_forest.pkl"
-
-TARGET_COL = "popularity"
-TEST_SIZE = 0.2
-RANDOM_STATE = 42
-
-AUDIO_FEATURES = [
-    "duration_ms",
-    "danceability",
-    "energy",
-    "key",
-    "loudness",
-    "mode",
-    "speechiness",
-    "acousticness",
-    "instrumentalness",
-    "liveness",
-    "valence",
-    "tempo",
-    "time_signature",
-    "explicit",
-]
-
-N_ESTIMATORS = 100
 
 
 def main(
     data_path: Path = DATA_PATH,
     model_path: Path = MODEL_PATH,
 ):
+    
+    # Load parameters
+    with open("params.yaml") as f:
+        params = yaml.safe_load(f)
+        target = params["global"]["target"]
+        seed = params["global"]["seed"]
+        n_estimator = params["train"]["n_estimators"]
+        audio_features = params["train"]["audio_features"]
+        test_split = params["split-data"]["test_split"]
+    
     # dagshub / MLflow
     dagshub.init(
         repo_owner="sergi.gonzalez.martos",
@@ -53,22 +41,19 @@ def main(
 
     mlflow.set_experiment("spotify-song-popularity")
 
+    # Load data
     logger.info(f"Loading dataset from {data_path}")
-    df = pd.read_csv(data_path)
+    train_df = pd.read_csv(data_path / TRAIN_FILE)
+    test_df = pd.read_csv(data_path / TEST_FILE)
+    
+    X_train = train_df[audio_features]
+    y_train = train_df[target]
+    X_test = test_df[audio_features]
+    y_test = test_df[target]
 
-    df["explicit"] = df["explicit"].astype(int)
+    train_df["explicit"] = train_df["explicit"].astype(int)
+    test_df["explicit"] = test_df["explicit"].astype(int)
 
-    logger.info(f"Dataset shape: {df.shape}")
-
-    # Select features and target
-    X = df[AUDIO_FEATURES]
-    y = df[TARGET_COL]
-
-    # Split data
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE,random_state=RANDOM_STATE)
-
-    logger.info(f"Training samples: {len(X_train)}")
-    logger.info(f"Test samples: {len(X_test)}")
 
     # Train and evaluate the final selected model
     with mlflow.start_run(run_name="random-forest-final") as run:
@@ -76,8 +61,8 @@ def main(
         mlflow.set_tag("model_stage", "final")
 
         model = RandomForestRegressor(
-            n_estimators=N_ESTIMATORS,
-            random_state=RANDOM_STATE,
+            n_estimators=n_estimator,
+            random_state=seed,
             n_jobs=-1,
         )
 
@@ -92,10 +77,10 @@ def main(
 
         # Log parameters
         mlflow.log_param("model", "RandomForestRegressor")
-        mlflow.log_param("n_estimators", N_ESTIMATORS)
-        mlflow.log_param("random_state", RANDOM_STATE)
-        mlflow.log_param("test_size", TEST_SIZE)
-        mlflow.log_param("features", ", ".join(AUDIO_FEATURES))
+        mlflow.log_param("n_estimators", n_estimator)
+        mlflow.log_param("random_state", seed)
+        mlflow.log_param("test_size", test_split)
+        mlflow.log_param("features", ", ".join(audio_features))
 
         # Log metrics
         mlflow.log_metric("mae", mae)
