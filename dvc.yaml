@@ -42,16 +42,15 @@ stages:
     - data/processed/test.csv
     - data/processed/train.csv
   train:
-    cmd: python src/models/train.py
+    cmd: python src/modeling/train.py
     deps:
     - data/processed/test.csv
     - data/processed/train.csv
-    - src/models/train.py
+    - src/modeling/train.py
     params:
     - global.seed
     - global.target
     - split-data.test_split
-    - train.audio_features
     - train.n_estimators
     outs:
     - models/random_forest.pkl

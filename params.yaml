@@ -17,3 +17,6 @@ featurize:
   skew_threshold: 1.0
   categorical_col: "track_genre"
   one_hot_prefix: "genre"
+
+train:
+  n_estimators: 100

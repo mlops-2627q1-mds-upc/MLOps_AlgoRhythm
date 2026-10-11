@@ -1,4 +1,5 @@
 [core]
     remote = origin
+    no_scm = false
 ['remote "origin"']
     url = https://dagshub.com/sergi.gonzalez.martos/MLOps_AlgoRhythm.dvc

@@ -29,7 +29,6 @@ def main(
         target = params["global"]["target"]
         seed = params["global"]["seed"]
         n_estimator = params["train"]["n_estimators"]
-        audio_features = params["train"]["audio_features"]
         test_split = params["split-data"]["test_split"]
     
     # dagshub / MLflow
@@ -46,13 +45,10 @@ def main(
     train_df = pd.read_csv(data_path / TRAIN_FILE)
     test_df = pd.read_csv(data_path / TEST_FILE)
     
-    X_train = train_df[audio_features]
+    X_train = train_df.drop(columns=[target])
     y_train = train_df[target]
-    X_test = test_df[audio_features]
+    X_test = test_df.drop(columns=[target])
     y_test = test_df[target]
-
-    train_df["explicit"] = train_df["explicit"].astype(int)
-    test_df["explicit"] = test_df["explicit"].astype(int)
 
 
     # Train and evaluate the final selected model
@@ -80,7 +76,6 @@ def main(
         mlflow.log_param("n_estimators", n_estimator)
         mlflow.log_param("random_state", seed)
         mlflow.log_param("test_size", test_split)
-        mlflow.log_param("features", ", ".join(audio_features))
 
         # Log metrics
         mlflow.log_metric("mae", mae)

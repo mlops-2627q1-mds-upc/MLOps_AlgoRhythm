@@ -8,12 +8,10 @@ stages:
       hash: md5
       md5: e50a70711e823b75c8ebe231468f5faf
       size: 20118244
-      isexec: true
     - path: src/data/preprocess.py
       hash: md5
-      md5: 3561e8443fa20669e4f0bd30d23e03da
-      size: 4694
-      isexec: true
+      md5: 35e48873b64ccf42bbc2282dd9d2cf3a
+      size: 4743
     params:
       params.yaml:
         global.target: popularity
@@ -32,57 +30,49 @@ stages:
     outs:
     - path: data/interim/dataset_preprocessed.csv
       hash: md5
-      md5: 3891d61a5e078e3b4e78d593c24fcb2c
-      size: 9591805
-      isexec: true
+      md5: b04536fa4fe42d801f28370c3a6abf3f
+      size: 9165973
   split-data:
     cmd: python src/data/split_data.py data/interim/dataset_preprocessed.csv 
       data/interim
     deps:
     - path: data/interim/dataset_preprocessed.csv
       hash: md5
-      md5: 3891d61a5e078e3b4e78d593c24fcb2c
-      size: 9591805
-      isexec: true
+      md5: b04536fa4fe42d801f28370c3a6abf3f
+      size: 9165973
     - path: src/data/split_data.py
       hash: md5
-      md5: 0607794356c7f51622dcc19a8dc8439e
-      size: 1481
-      isexec: true
+      md5: 8144563fe318ab2ec55f4ce3f67397c0
+      size: 1436
     params:
       params.yaml:
         global.seed: 0
-        split-data.test_split: 0.3
-        split-data.train_split: 0.7
+        split-data.test_split: 0.2
+        split-data.train_split: 0.8
     outs:
     - path: data/interim/test.csv
       hash: md5
-      md5: cc923d4d740eaf2c20176849ed4dff95
-      size: 2877926
-      isexec: true
+      md5: d6cb9cac2a6ad9c8a2aaf13e8631b5eb
+      size: 1833547
     - path: data/interim/train.csv
       hash: md5
-      md5: 15792926a626deaee4766f2b663a33e8
-      size: 6714041
-      isexec: true
+      md5: a9262422505986ce24a10d7a13bdea75
+      size: 7332588
   featurize:
     cmd: python src/data/featurize.py data/interim data/processed
     deps:
     - path: data/interim/test.csv
       hash: md5
-      md5: cc923d4d740eaf2c20176849ed4dff95
-      size: 2877926
-      isexec: true
+      md5: d6cb9cac2a6ad9c8a2aaf13e8631b5eb
+      size: 1833547
     - path: data/interim/train.csv
       hash: md5
-      md5: 15792926a626deaee4766f2b663a33e8
-      size: 6714041
-      isexec: true
+      md5: a9262422505986ce24a10d7a13bdea75
+      size: 7332588
     - path: src/data/featurize.py
       hash: md5
       md5: a9aec615eef4cda9891baad45674f5d7
       size: 5213
-      isexec: true
     params:
       params.yaml:
         featurize.categorical_col: track_genre
@@ -93,11 +83,35 @@ stages:
     outs:
     - path: data/processed/test.csv
       hash: md5
-      md5: bceba32da77b82c9afc5ddc2067dc02f
-      size: 10047125
-      isexec: true
+      md5: 68173651d567b7866cebf80194f44aca
+      size: 6613605
     - path: data/processed/train.csv
       hash: md5
-      md5: 066c0a242d3d7de55a2ee2a9dc538515
-      size: 23440561
-      isexec: true
+      md5: a307cfb49c7b7364088817d2e7a9afd6
+      size: 26448249
+  train:
+    cmd: python src/modeling/train.py
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 68173651d567b7866cebf80194f44aca
+      size: 6613605
+    - path: data/processed/train.csv
+      hash: md5
+      md5: a307cfb49c7b7364088817d2e7a9afd6
+      size: 26448249
+    - path: src/modeling/train.py
+      hash: md5
+      md5: aea7e2bb3beaf88ea5e801a907314ae9
+      size: 3315
+    params:
+      params.yaml:
+        global.seed: 0
+        global.target: popularity
+        split-data.test_split: 0.2
+        train.n_estimators: 100
+    outs:
+    - path: models/random_forest.pkl
+      hash: md5
+      md5: 698d1b44a851a13832deda81ac50ee8e
+      size: 575067857
