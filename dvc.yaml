@@ -23,6 +23,7 @@ stages:
     - global.seed
     - split-data.test_split
     - split-data.train_split
+    - src/config.py
     outs:
     - data/interim/test.csv
     - data/interim/train.csv
@@ -32,6 +33,7 @@ stages:
     - data/interim/test.csv
     - data/interim/train.csv
     - src/data/featurize.py
+    - src/config.py
     params:
     - featurize.categorical_col
     - featurize.categorical_max_unique
