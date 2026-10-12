@@ -126,8 +126,8 @@ stages:
       isexec: true
     - path: src/modeling/train.py
       hash: md5
-      md5: 453a121a9de856073212bd90e403dc2b
-      size: 3675
+      md5: 03d0703efafcf56472e9889c32ac8dfc
+      size: 4786
       isexec: true
     params:
       params.yaml:

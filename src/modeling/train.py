@@ -85,9 +85,31 @@ def main(
         mlflow.log_metric("rmse", rmse)
         mlflow.log_metric("r2", r2)
         
-        emissions_kg = tracker.stop()
-        mlflow.log_metric("co2_emissions_kg", emissions_kg)
-
+        # greenAI data
+        tracker.stop()
+        data = tracker.final_emissions_data
+        emissions_kg = getattr(data, "emissions", 0.0)
+        energy_kwh = getattr(data, "energy_consumed", 0.0)
+        duration_sec = getattr(data, "duration", 0.0)
+        country = getattr(data, "country_name", "Unknown")
+        region = getattr(data, "region", "Unknown")
+        cpu_model = getattr(data, "cpu_model", "Unknown")
+        cpu_count = getattr(data, "cpu_count", 0)
+        gpu_model = getattr(data, "gpu_model", "None")
+        gpu_count = getattr(data, "gpu_count", 0)
+        
+        
+        mlflow.log_metric("co2_emissions_kg", emissions_kg if emissions_kg else 0.0)
+        mlflow.log_metric("energy_consumed_kwh", energy_kwh if energy_kwh else 0.0)
+        mlflow.log_metric("compute_duration_seconds", duration_sec if duration_sec else 0.0)
+        
+        mlflow.log_param("cpu_model", str(cpu_model))
+        mlflow.log_param("cpu_count", int(cpu_count))
+        mlflow.log_param("gpu_model", str(gpu_model))
+        mlflow.log_param("gpu_count", int(gpu_count))
+        mlflow.log_param("compute_country", str(country))
+        mlflow.log_param("compute_region", str(region))
+        
         # Log trained model to MLflow and register it in the Model Registry
         # description
         mlflow.sklearn.log_model(
