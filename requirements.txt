@@ -10,7 +10,10 @@ pip
 pytest
 python-dotenv
 ruff
+dagshub
+mlflow
 scikit-learn
 tqdm
 typer
+great_expectations
 -e .

@@ -92,8 +92,9 @@ def remove_outliers(df, cols: list[str], z_threshold: float) -> pd.DataFrame:
     rows_to_remove = is_outlier.any(axis=1)
     rows_before = len(df)
     df = df.loc[~rows_to_remove].reset_index(drop=True)
+    logger.info("Outliers per variable:\n{}", is_outlier.sum().to_string())
     logger.info(
-        "Rows before: %s | removed: %s (%.2f%%) | after: %s",
+        "Rows before: {} | removed: {} ({:.2f}%) | after: {}",
         f"{rows_before:,}", f"{int(rows_to_remove.sum()):,}",
         100 * rows_to_remove.mean(), f"{len(df):,}",
     )
