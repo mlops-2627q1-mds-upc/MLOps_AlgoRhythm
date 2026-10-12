@@ -10,9 +10,7 @@ import yaml
 from src.validation.common import finish, run_validation
 
 
-def expected_fill_values(
-    train: pd.DataFrame, target: str, max_unique: int, skew_threshold: float
-) -> dict:
+def expected_fill_values(train: pd.DataFrame, target: str, max_unique: int, skew_threshold: float) -> dict:
     """Independently recompute the imputation values featurize.py should learn on train."""
     numeric = train.select_dtypes(include=np.number).columns.tolist()
     categorical = train.select_dtypes(exclude=np.number).columns.tolist()

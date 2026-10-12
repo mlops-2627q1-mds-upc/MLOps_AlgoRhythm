@@ -9,9 +9,7 @@ from loguru import logger
 from src.config import TEST_FILE, TRAIN_FILE
 
 
-def classify_variables(
-    df, target: str, categorical_max_unique: int
-) -> tuple[list[str], list[str], list[str]]:
+def classify_variables(df, target: str, categorical_max_unique: int) -> tuple[list[str], list[str], list[str]]:
     """
     Classifies the dataframe columns in numerical and categorical.
     Must be called on the training set only.
@@ -33,9 +31,7 @@ def classify_variables(
     return numeric_cols, categorical_cols, integer_cols
 
 
-def fit_imputer(
-    train_df: pd.DataFrame, target: str, categorical_max_unique: int, skew_threshold: float
-) -> dict:
+def fit_imputer(train_df: pd.DataFrame, target: str, categorical_max_unique: int, skew_threshold: float) -> dict:
     """
     Learns the fill value of every column using the training set only
     (median/mean for numeric columns, mode for categorical ones).
@@ -77,9 +73,7 @@ def apply_imputer(df: pd.DataFrame, fill_values: dict, name: str) -> pd.DataFram
     return df
 
 
-def one_hot_encode(
-    df: pd.DataFrame, col: str, prefix: str, categories: list, name: str
-) -> pd.DataFrame:
+def one_hot_encode(df: pd.DataFrame, col: str, prefix: str, categories: list, name: str) -> pd.DataFrame:
     """
     One-hot encodes `col` using a fixed list of categories (learned on train),
     so train and test end up with exactly the same columns in the same order.
