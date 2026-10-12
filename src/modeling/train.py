@@ -10,6 +10,7 @@ from pathlib import Path
 from loguru import logger
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from codecarbon import EmissionsTracker
 
 from src.config import MODELS_DIR, PROCESSED_DATA_DIR, TRAIN_FILE, TEST_FILE
 
@@ -50,6 +51,8 @@ def main(
     X_test = test_df.drop(columns=[target])
     y_test = test_df[target]
 
+    tracker = EmissionsTracker(project_name="spotify_rf_training", save_to_file=False)
+    tracker.start()
 
     # Train and evaluate the final selected model
     with mlflow.start_run(run_name="random-forest-final") as run:
@@ -82,6 +85,31 @@ def main(
         mlflow.log_metric("rmse", rmse)
         mlflow.log_metric("r2", r2)
 
+        # greenAI data
+        tracker.stop()
+        data = tracker.final_emissions_data
+        emissions_kg = getattr(data, "emissions", 0.0)
+        energy_kwh = getattr(data, "energy_consumed", 0.0)
+        duration_sec = getattr(data, "duration", 0.0)
+        country = getattr(data, "country_name", "Unknown")
+        region = getattr(data, "region", "Unknown")
+        cpu_model = getattr(data, "cpu_model", "Unknown")
+        cpu_count = getattr(data, "cpu_count", 0)
+        gpu_model = getattr(data, "gpu_model", "None")
+        gpu_count = getattr(data, "gpu_count", 0)
+
+
+        mlflow.log_metric("co2_emissions_kg", emissions_kg if emissions_kg else 0.0)
+        mlflow.log_metric("energy_consumed_kwh", energy_kwh if energy_kwh else 0.0)
+        mlflow.log_metric("compute_duration_seconds", duration_sec if duration_sec else 0.0)
+
+        mlflow.log_param("cpu_model", str(cpu_model))
+        mlflow.log_param("cpu_count", int(cpu_count))
+        mlflow.log_param("gpu_model", str(gpu_model))
+        mlflow.log_param("gpu_count", int(gpu_count))
+        mlflow.log_param("compute_country", str(country))
+        mlflow.log_param("compute_region", str(region))
+
         # Log trained model to MLflow and register it in the Model Registry
         # description
         mlflow.sklearn.log_model(
@@ -101,12 +129,14 @@ def main(
     logger.info(f"MAE:  {mae:.2f}")
     logger.info(f"RMSE: {rmse:.2f}")
     logger.info(f"R²:   {r2:.2f}")
+    logger.info(f"Emissions CO2: {emissions_kg:.2f}")
 
     print("\nFinal model evaluation")
     print("----------------------")
     print(f"MAE:  {mae:.2f}")
     print(f"RMSE: {rmse:.2f}")
     print(f"R²:   {r2:.2f}")
+    print(f"Emissions CO2: {emissions_kg:.2f}")
 
     logger.success("Final model training completed.")
 
