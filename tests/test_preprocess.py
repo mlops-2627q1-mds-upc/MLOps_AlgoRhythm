@@ -12,14 +12,15 @@ from src.data.preprocess import (
 )
 
 
-# ---------------------------------------------------------------- change_type
+# change_type
 def test_change_type_casts_bool_to_int():
     df = pd.DataFrame({"explicit": [True, False, True]})
     out = change_type(df)
     assert out["explicit"].tolist() == [1, 0, 1]
     assert pd.api.types.is_integer_dtype(out["explicit"])
 
-# ------------------------------------------------------------ drop_duplicates
+
+# drop_duplicates
 def test_drop_duplicates_removes_repeated_rows_and_resets_index():
     df = pd.DataFrame({"a": [1, 1, 1], "b": ["x", "x", "y"]})
     out = drop_duplicates(df)
@@ -34,7 +35,6 @@ def test_drop_duplicates_keeps_unique_rows_untouched():
 
 
 def test_duplicates_created_by_dropping_columns_are_removed_by_second_pass():
-    # Rows differ only in 'track_id'; they become identical once it is dropped
     df = pd.DataFrame({"track_id": ["a", "b"], "x": [1, 1]})
     out = drop_duplicates(df)
     assert out.equals(df)
@@ -43,7 +43,8 @@ def test_duplicates_created_by_dropping_columns_are_removed_by_second_pass():
     assert len(out) == 1
     assert out.index.tolist() == [0]
 
-# --------------------------------------------------------- drop_columns_empty
+
+# drop_columns_empty
 def test_drop_columns_empty_threshold_is_strict():
     df = pd.DataFrame(
         {
@@ -61,7 +62,8 @@ def test_drop_columns_empty_keeps_everything_when_no_nans():
     out = drop_columns_empty(df, missing_drop_threshold=0.1)
     assert list(out.columns) == ["a", "b"]
 
-# ------------------------------------------------------- drop_rows_no_target
+
+# drop_rows_no_target
 def test_drop_rows_no_target_drops_nan_rows_and_never_imputes():
     df = pd.DataFrame({"x": [1, 2, 3], "target": [10.0, np.nan, 30.0]})
     out = drop_rows_no_target(df, "target")
@@ -81,7 +83,8 @@ def test_no_drop_rows_no_target_missing_other_col_missing():
     out = drop_rows_no_target(df, "target")
     assert out.equals(df)
 
-# ------------------------------------------- drop_columns_not_informative
+
+# drop_columns_not_informative
 def test_drop_columns_not_informative_drops_listed_columns():
     df = pd.DataFrame({"id": [1, 2], "keep": [3, 4], "name": ["a", "b"]})
     out = drop_columns_not_informative(df, ["id", "name"])
@@ -93,7 +96,7 @@ def test_drop_columns_not_informative_ignores_absent_columns():
     out = drop_columns_not_informative(df, ["does_not_exist"])
     assert out.equals(df)
 
-# ----------------------------------------------------------- remove_outliers
+# remove_outliers
 def test_remove_outliers_drops_extreme_row():
     df = pd.DataFrame({"v": [1.0] * 20 + [100.0]})
     out = remove_outliers(df, ["v"], z_threshold=3)
