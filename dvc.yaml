@@ -19,11 +19,11 @@ stages:
     deps:
     - data/interim/dataset_preprocessed.csv
     - src/data/split_data.py
+    - src/config.py
     params:
     - global.seed
     - split-data.test_split
     - split-data.train_split
-    - src/config.py
     outs:
     - data/interim/test.csv
     - data/interim/train.csv

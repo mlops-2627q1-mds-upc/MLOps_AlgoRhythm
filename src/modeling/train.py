@@ -10,6 +10,7 @@ from pathlib import Path
 from loguru import logger
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from codecarbon import EmissionsTracker
 
 from src.config import MODELS_DIR, PROCESSED_DATA_DIR, TRAIN_FILE, TEST_FILE
 
@@ -50,6 +51,8 @@ def main(
     X_test = test_df.drop(columns=[target])
     y_test = test_df[target]
 
+    tracker = EmissionsTracker(project_name="spotify_rf_training", save_to_file=False)
+    tracker.start()
 
     # Train and evaluate the final selected model
     with mlflow.start_run(run_name="random-forest-final") as run:
@@ -81,6 +84,9 @@ def main(
         mlflow.log_metric("mae", mae)
         mlflow.log_metric("rmse", rmse)
         mlflow.log_metric("r2", r2)
+        
+        emissions_kg = tracker.stop()
+        mlflow.log_metric("co2_emissions_kg", emissions_kg)
 
         # Log trained model to MLflow and register it in the Model Registry
         # description
@@ -101,12 +107,14 @@ def main(
     logger.info(f"MAE:  {mae:.2f}")
     logger.info(f"RMSE: {rmse:.2f}")
     logger.info(f"R²:   {r2:.2f}")
+    logger.info(f"Emissions CO2:   {emissions_kg:.2f}")
 
     print("\nFinal model evaluation")
     print("----------------------")
     print(f"MAE:  {mae:.2f}")
     print(f"RMSE: {rmse:.2f}")
     print(f"R²:   {r2:.2f}")
+    print(f"Emissions CO2:   {emissions_kg:.2f}")
 
     logger.success("Final model training completed.")
 

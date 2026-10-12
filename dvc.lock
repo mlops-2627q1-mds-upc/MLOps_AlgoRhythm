@@ -8,10 +8,12 @@ stages:
       hash: md5
       md5: e50a70711e823b75c8ebe231468f5faf
       size: 20118244
+      isexec: true
     - path: src/data/preprocess.py
       hash: md5
-      md5: 35e48873b64ccf42bbc2282dd9d2cf3a
-      size: 4743
+      md5: 080650165d114048438959759dec43ab
+      size: 4824
+      isexec: true
     params:
       params.yaml:
         global.target: popularity
@@ -32,6 +34,7 @@ stages:
       hash: md5
       md5: b04536fa4fe42d801f28370c3a6abf3f
       size: 9165973
+      isexec: true
   split-data:
     cmd: python src/data/split_data.py data/interim/dataset_preprocessed.csv 
       data/interim
@@ -40,10 +43,17 @@ stages:
       hash: md5
       md5: b04536fa4fe42d801f28370c3a6abf3f
       size: 9165973
+      isexec: true
+    - path: src/config.py
+      hash: md5
+      md5: 8014c138b52d6b7bf8809f9c0af04a0a
+      size: 889
+      isexec: true
     - path: src/data/split_data.py
       hash: md5
-      md5: 8144563fe318ab2ec55f4ce3f67397c0
-      size: 1436
+      md5: 0607794356c7f51622dcc19a8dc8439e
+      size: 1481
+      isexec: true
     params:
       params.yaml:
         global.seed: 0
@@ -54,10 +64,12 @@ stages:
       hash: md5
       md5: d6cb9cac2a6ad9c8a2aaf13e8631b5eb
       size: 1833547
+      isexec: true
     - path: data/interim/train.csv
       hash: md5
       md5: a9262422505986ce24a10d7a13bdea75
       size: 7332588
+      isexec: true
   featurize:
     cmd: python src/data/featurize.py data/interim data/processed
     deps:
@@ -65,14 +77,22 @@ stages:
       hash: md5
       md5: d6cb9cac2a6ad9c8a2aaf13e8631b5eb
       size: 1833547
+      isexec: true
     - path: data/interim/train.csv
       hash: md5
       md5: a9262422505986ce24a10d7a13bdea75
       size: 7332588
+      isexec: true
+    - path: src/config.py
+      hash: md5
+      md5: 8014c138b52d6b7bf8809f9c0af04a0a
+      size: 889
+      isexec: true
     - path: src/data/featurize.py
       hash: md5
       md5: a9aec615eef4cda9891baad45674f5d7
       size: 5213
+      isexec: true
     params:
       params.yaml:
         featurize.categorical_col: track_genre
@@ -85,10 +105,12 @@ stages:
       hash: md5
       md5: 68173651d567b7866cebf80194f44aca
       size: 6613605
+      isexec: true
     - path: data/processed/train.csv
       hash: md5
       md5: a307cfb49c7b7364088817d2e7a9afd6
       size: 26448249
+      isexec: true
   train:
     cmd: python src/modeling/train.py
     deps:
@@ -96,14 +118,17 @@ stages:
       hash: md5
       md5: 68173651d567b7866cebf80194f44aca
       size: 6613605
+      isexec: true
     - path: data/processed/train.csv
       hash: md5
       md5: a307cfb49c7b7364088817d2e7a9afd6
       size: 26448249
+      isexec: true
     - path: src/modeling/train.py
       hash: md5
-      md5: aea7e2bb3beaf88ea5e801a907314ae9
-      size: 3315
+      md5: 453a121a9de856073212bd90e403dc2b
+      size: 3675
+      isexec: true
     params:
       params.yaml:
         global.seed: 0
@@ -115,3 +140,4 @@ stages:
       hash: md5
       md5: 698d1b44a851a13832deda81ac50ee8e
       size: 575067857
+      isexec: true

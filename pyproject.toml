@@ -17,8 +17,11 @@ classifiers = [
 ]
 requires-python = "~=3.11.0"
 dependencies = [
+    "codecarbon>=3.3.1",
+    "dagshub>=0.7.2",
     "dvc>=3.67.1",
     "loguru>=0.7.3",
+    "mlflow>=3.17.0",
     "pandas>=3.0.6",
     "scikit-learn>=1.9.1",
 ]
