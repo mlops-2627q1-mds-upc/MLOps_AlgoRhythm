@@ -1,0 +1,152 @@
+{
+  "train": {
+    "success": true,
+    "details": {
+      "success": true,
+      "statistics": {
+        "evaluated_expectations": 2,
+        "successful_expectations": 2,
+        "unsuccessful_expectations": 0,
+        "success_percent": 100.0
+      },
+      "expectations": [
+        {
+          "expectation_type": "expect_table_row_count_to_be_between",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-train",
+            "min_value": 80485,
+            "max_value": 82521
+          },
+          "result": {
+            "observed_value": 81503
+          }
+        },
+        {
+          "expectation_type": "expect_table_columns_to_match_set",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-train",
+            "column_set": [
+              "popularity",
+              "duration_ms",
+              "explicit",
+              "danceability",
+              "energy",
+              "key",
+              "loudness",
+              "mode",
+              "speechiness",
+              "acousticness",
+              "instrumentalness",
+              "liveness",
+              "valence",
+              "tempo",
+              "time_signature",
+              "track_genre"
+            ]
+          },
+          "result": {
+            "observed_value": [
+              "acousticness",
+              "danceability",
+              "duration_ms",
+              "energy",
+              "explicit",
+              "instrumentalness",
+              "key",
+              "liveness",
+              "loudness",
+              "mode",
+              "popularity",
+              "speechiness",
+              "tempo",
+              "time_signature",
+              "track_genre",
+              "valence"
+            ]
+          }
+        }
+      ],
+      "result_url": null
+    }
+  },
+  "test": {
+    "success": true,
+    "details": {
+      "success": true,
+      "statistics": {
+        "evaluated_expectations": 2,
+        "successful_expectations": 2,
+        "unsuccessful_expectations": 0,
+        "success_percent": 100.0
+      },
+      "expectations": [
+        {
+          "expectation_type": "expect_table_row_count_to_be_between",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-test",
+            "min_value": 19358,
+            "max_value": 21394
+          },
+          "result": {
+            "observed_value": 20376
+          }
+        },
+        {
+          "expectation_type": "expect_table_columns_to_match_set",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-test",
+            "column_set": [
+              "popularity",
+              "duration_ms",
+              "explicit",
+              "danceability",
+              "energy",
+              "key",
+              "loudness",
+              "mode",
+              "speechiness",
+              "acousticness",
+              "instrumentalness",
+              "liveness",
+              "valence",
+              "tempo",
+              "time_signature",
+              "track_genre"
+            ]
+          },
+          "result": {
+            "observed_value": [
+              "acousticness",
+              "danceability",
+              "duration_ms",
+              "energy",
+              "explicit",
+              "instrumentalness",
+              "key",
+              "liveness",
+              "loudness",
+              "mode",
+              "popularity",
+              "speechiness",
+              "tempo",
+              "time_signature",
+              "track_genre",
+              "valence"
+            ]
+          }
+        }
+      ],
+      "result_url": null
+    }
+  },
+  "no_overlap": {
+    "success": true,
+    "details": {
+      "overlapping_rows": 0
+    }
+  }
+}

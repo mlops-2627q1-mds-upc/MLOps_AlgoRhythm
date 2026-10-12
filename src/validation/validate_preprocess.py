@@ -27,7 +27,10 @@ def expected_state(raw: pd.DataFrame, params: dict) -> dict:
     # 4. Non-informative columns
     df = df.drop(columns=p["cols_to_drop"], errors="ignore")
 
-    # 5. Z-score outliers: mean/std are computed at this point of the pipeline
+    # 5. Duplicates created by dropping the columns above
+    df = df.drop_duplicates().reset_index(drop=True)
+
+    # 6. Z-score outliers: mean/std are computed at this point of the pipeline
     cols = p["outlier_cols"]
     mean, std = df[cols].mean(), df[cols].std()
     z = (df[cols] - mean) / std

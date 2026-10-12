@@ -128,6 +128,7 @@ def main():
     df = drop_columns_empty(df, missing_drop_threshold)
     df = drop_rows_no_target(df, target)
     df = drop_columns_not_informative(df, cols_to_drop)
+    df = drop_duplicates(df)
     df = remove_outliers(df, outlier_cols, z_threshold)
 
     # Save dataset
