@@ -4,7 +4,7 @@ import great_expectations.expectations as gxe
 import pandas as pd
 import yaml
 
-from common import finish, run_validation
+from src.validation.common import finish, run_validation
 
 
 def expected_state(raw: pd.DataFrame, params: dict) -> dict:
@@ -45,7 +45,8 @@ def expected_state(raw: pd.DataFrame, params: dict) -> dict:
 
 
 def main(raw_path: str, preprocessed_path: str, report_path: str) -> None:
-    params = yaml.safe_load(open("params.yaml"))
+    with open("params.yaml", encoding="utf-8") as f:
+        params = yaml.safe_load(f)
     target = params["global"]["target"]
     z_threshold = params["preprocess"]["z_threshold"]
     outlier_cols = params["preprocess"]["outlier_cols"]

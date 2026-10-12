@@ -1,19 +1,20 @@
-import joblib
+# pylint: disable=too-many-locals,too-many-statements
+
+from pathlib import Path
+
 import dagshub
+import joblib
 import mlflow
 import mlflow.sklearn
 import numpy as np
 import pandas as pd
 import yaml
-
-from pathlib import Path
+from codecarbon import EmissionsTracker
 from loguru import logger
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from codecarbon import EmissionsTracker
 
-from src.config import MODELS_DIR, PROCESSED_DATA_DIR, TRAIN_FILE, TEST_FILE
-
+from src.config import MODELS_DIR, PROCESSED_DATA_DIR, TEST_FILE, TRAIN_FILE
 
 DATA_PATH = PROCESSED_DATA_DIR
 MODEL_PATH = MODELS_DIR / "random_forest.pkl"
@@ -23,15 +24,15 @@ def main(
     data_path: Path = DATA_PATH,
     model_path: Path = MODEL_PATH,
 ):
-    
+
     # Load parameters
-    with open("params.yaml") as f:
+    with open("params.yaml", encoding="utf-8") as f:
         params = yaml.safe_load(f)
         target = params["global"]["target"]
         seed = params["global"]["seed"]
         n_estimator = params["train"]["n_estimators"]
         test_split = params["split-data"]["test_split"]
-    
+
     # dagshub / MLflow
     dagshub.init(
         repo_owner="sergi.gonzalez.martos",
@@ -45,7 +46,7 @@ def main(
     logger.info(f"Loading dataset from {data_path}")
     train_df = pd.read_csv(data_path / TRAIN_FILE)
     test_df = pd.read_csv(data_path / TEST_FILE)
-    
+
     X_train = train_df.drop(columns=[target])
     y_train = train_df[target]
     X_test = test_df.drop(columns=[target])
@@ -98,7 +99,6 @@ def main(
         gpu_model = getattr(data, "gpu_model", "None")
         gpu_count = getattr(data, "gpu_count", 0)
 
-
         mlflow.log_metric("co2_emissions_kg", emissions_kg if emissions_kg else 0.0)
         mlflow.log_metric("energy_consumed_kwh", energy_kwh if energy_kwh else 0.0)
         mlflow.log_metric("compute_duration_seconds", duration_sec if duration_sec else 0.0)
@@ -115,7 +115,7 @@ def main(
         mlflow.sklearn.log_model(
             sk_model=model,
             name="model",
-            registered_model_name="spotify_popularity_rf", 
+            registered_model_name="spotify_popularity_rf",
             skops_trusted_types=["sklearn.tree._tree.Tree"],
         )
         logger.info(f"MLflow run ID: {run.info.run_id}")

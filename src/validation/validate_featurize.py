@@ -1,3 +1,5 @@
+# pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+
 import sys
 
 import great_expectations.expectations as gxe
@@ -5,11 +7,12 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from common import finish, run_validation
+from src.validation.common import finish, run_validation
 
 
-def expected_fill_values(train: pd.DataFrame, target: str, max_unique: int,
-                         skew_threshold: float) -> dict:
+def expected_fill_values(
+    train: pd.DataFrame, target: str, max_unique: int, skew_threshold: float
+) -> dict:
     """Independently recompute the imputation values featurize.py should learn on train."""
     numeric = train.select_dtypes(include=np.number).columns.tolist()
     categorical = train.select_dtypes(exclude=np.number).columns.tolist()
@@ -30,8 +33,11 @@ def expected_fill_values(train: pd.DataFrame, target: str, max_unique: int,
         if train[col].isna().all():
             continue  # featurize.py skips these columns (they stay NaN)
         if col in numeric:
-            value = train[col].median() if abs(train[col].skew()) > skew_threshold \
+            value = (
+                train[col].median()
+                if abs(train[col].skew()) > skew_threshold
                 else train[col].mean()
+            )
             if col in integer_cols:
                 value = round(value)
         else:
@@ -89,7 +95,7 @@ def validate_split(name, out, expected, n_rows_in, fill, cat_col, dummy_cols, is
         return results
 
     # Imputation: every value equals interim value, or the train-learned fill if it was NaN
-    bad_imp = mismatched_columns(out, expected, [c for c in other_cols])
+    bad_imp = mismatched_columns(out, expected, [other_cols])
     results[f"{name}_imputation"] = check(not bad_imp, mismatched_columns=bad_imp)
 
     # One-hot: values equal the expected encoding, and row sums are consistent
@@ -109,7 +115,8 @@ def validate_split(name, out, expected, n_rows_in, fill, cat_col, dummy_cols, is
 
 
 def main(interim_dir: str, processed_dir: str, report_path: str) -> None:
-    params = yaml.safe_load(open("params.yaml"))
+    with open("params.yaml", encoding="utf-8") as f:
+        params = yaml.safe_load(f)
     target = params["global"]["target"]
     f = params["featurize"]
     cat_col, prefix = f["categorical_col"], f["one_hot_prefix"]
@@ -120,8 +127,7 @@ def main(interim_dir: str, processed_dir: str, report_path: str) -> None:
     test_out = pd.read_csv(f"{processed_dir}/test.csv")
 
     # Everything is learned on train only, then applied to both splits
-    fill = expected_fill_values(train_in, target, f["categorical_max_unique"],
-                                f["skew_threshold"])
+    fill = expected_fill_values(train_in, target, f["categorical_max_unique"], f["skew_threshold"])
     train_imp = train_in.fillna(value=fill)
     test_imp = test_in.fillna(value=fill)
     categories = sorted(train_imp[cat_col].dropna().unique())
@@ -131,10 +137,16 @@ def main(interim_dir: str, processed_dir: str, report_path: str) -> None:
     dummy_cols = [c for c in exp_train.columns if c not in train_imp.columns]
 
     results = {}
-    results.update(validate_split("train", train_out, exp_train, len(train_in),
-                                  fill, cat_col, dummy_cols, is_train=True))
-    results.update(validate_split("test", test_out, exp_test, len(test_in),
-                                  fill, cat_col, dummy_cols, is_train=False))
+    results.update(
+        validate_split(
+            "train", train_out, exp_train, len(train_in), fill, cat_col, dummy_cols, is_train=True
+        )
+    )
+    results.update(
+        validate_split(
+            "test", test_out, exp_test, len(test_in), fill, cat_col, dummy_cols, is_train=False
+        )
+    )
     finish(results, report_path)
 
 

@@ -4,11 +4,26 @@ import great_expectations.expectations as gxe
 import pandas as pd
 import yaml
 
-from common import finish, run_validation
+from src.validation.common import finish, run_validation
+
+
+def check_no_overlap(train: pd.DataFrame, test: pd.DataFrame) -> dict:
+    """Check that no row appears in both train and test (data leakage)."""
+    shared_cols = [c for c in train.columns if c in test.columns]
+    n_overlap = len(
+        train[shared_cols]
+        .drop_duplicates()
+        .merge(test[shared_cols].drop_duplicates(), how="inner", on=shared_cols)
+    )
+    return {
+        "success": n_overlap == 0,
+        "details": {"overlapping_rows": n_overlap},
+    }
 
 
 def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
-    params = yaml.safe_load(open("params.yaml"))
+    with open("params.yaml", encoding="utf-8") as f:
+        params = yaml.safe_load(f)
     test_split = params["split-data"]["test_split"]
 
     full = pd.read_csv(preprocessed_path)
@@ -30,9 +45,7 @@ def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
             "train",
             [
                 size_check(n - expected_test),
-                gxe.ExpectTableColumnsToMatchSet(
-                    column_set=list(full.columns), exact_match=True
-                ),
+                gxe.ExpectTableColumnsToMatchSet(column_set=list(full.columns), exact_match=True),
             ],
         ),
         "test": run_validation(
@@ -40,23 +53,12 @@ def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
             "test",
             [
                 size_check(expected_test),
-                gxe.ExpectTableColumnsToMatchSet(
-                    column_set=list(full.columns), exact_match=True
-                ),
+                gxe.ExpectTableColumnsToMatchSet(column_set=list(full.columns), exact_match=True),
             ],
         ),
     }
 
-    # No row can appear in both train and test (data leakage).
-    # Inner merge on all shared columns: any match is an overlapping row.
-    shared_cols = [c for c in train.columns if c in test.columns]
-    n_overlap = len(train[shared_cols].drop_duplicates().merge(
-        test[shared_cols].drop_duplicates(), how="inner", on=shared_cols
-    ))
-    results["no_overlap"] = {
-        "success": n_overlap == 0,
-        "details": {"overlapping_rows": n_overlap},
-    }
+    results["no_overlap"] = check_no_overlap(train, test)
 
     finish(results, report_path)
 

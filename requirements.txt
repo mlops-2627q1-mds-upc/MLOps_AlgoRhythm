@@ -8,6 +8,7 @@ numpy
 pandas
 pip
 pytest
+pylint
 python-dotenv
 ruff
 dagshub
@@ -15,5 +16,9 @@ mlflow
 scikit-learn
 tqdm
 typer
+pytest 
+pytest-cov
 great_expectations
+black 
+isort
 -e .

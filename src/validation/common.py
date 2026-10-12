@@ -25,7 +25,7 @@ def run_validation(df: pd.DataFrame, name: str, expectations: list) -> dict:
 
 def finish(results: dict, report_path: str) -> None:
     """Write the report and exit with code 1 if any validation failed."""
-    with open(report_path, "w") as f:
+    with open(report_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, default=str)
 
     failed = [name for name, r in results.items() if not r["success"]]

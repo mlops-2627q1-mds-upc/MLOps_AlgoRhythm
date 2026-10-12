@@ -1,13 +1,17 @@
-import pandas as pd
+import sys
+from pathlib import Path
+
 import numpy as np
+import pandas as pd
 import yaml
 from loguru import logger
-from pathlib import Path
-import sys
-from src.config import TRAIN_FILE, TEST_FILE
+
+from src.config import TEST_FILE, TRAIN_FILE
 
 
-def classify_variables(df, target: str, categorical_max_unique: int) -> tuple[list[str], list[str], list[str]]:
+def classify_variables(
+    df, target: str, categorical_max_unique: int
+) -> tuple[list[str], list[str], list[str]]:
     """
     Classifies the dataframe columns in numerical and categorical.
     Must be called on the training set only.
@@ -16,8 +20,7 @@ def classify_variables(df, target: str, categorical_max_unique: int) -> tuple[li
     categorical_cols = df.select_dtypes(exclude=np.number).columns.tolist()
 
     low_card_numeric = [
-        c for c in numeric_cols
-        if df[c].nunique() <= categorical_max_unique and c != target
+        c for c in numeric_cols if df[c].nunique() <= categorical_max_unique and c != target
     ]
     numeric_cols = [c for c in numeric_cols if c not in low_card_numeric]
     categorical_cols = categorical_cols + low_card_numeric
@@ -30,8 +33,9 @@ def classify_variables(df, target: str, categorical_max_unique: int) -> tuple[li
     return numeric_cols, categorical_cols, integer_cols
 
 
-def fit_imputer(train_df: pd.DataFrame, target: str, categorical_max_unique: int,
-                skew_threshold: float) -> dict:
+def fit_imputer(
+    train_df: pd.DataFrame, target: str, categorical_max_unique: int, skew_threshold: float
+) -> dict:
     """
     Learns the fill value of every column using the training set only
     (median/mean for numeric columns, mode for categorical ones).
@@ -73,7 +77,9 @@ def apply_imputer(df: pd.DataFrame, fill_values: dict, name: str) -> pd.DataFram
     return df
 
 
-def one_hot_encode(df: pd.DataFrame, col: str, prefix: str, categories: list, name: str) -> pd.DataFrame:
+def one_hot_encode(
+    df: pd.DataFrame, col: str, prefix: str, categories: list, name: str
+) -> pd.DataFrame:
     """
     One-hot encodes `col` using a fixed list of categories (learned on train),
     so train and test end up with exactly the same columns in the same order.
@@ -83,7 +89,11 @@ def one_hot_encode(df: pd.DataFrame, col: str, prefix: str, categories: list, na
 
     n_unseen = int((~df[col].isin(categories) & df[col].notna()).sum())
     if n_unseen:
-        logger.warning("[{}] {} rows with categories not present in train (encoded as all zeros)", name, n_unseen)
+        logger.warning(
+            "[{}] {} rows with categories not present in train (encoded as all zeros)",
+            name,
+            n_unseen,
+        )
 
     df = df.copy()
     df[col] = pd.Categorical(df[col], categories=categories)
@@ -95,7 +105,9 @@ def one_hot_encode(df: pd.DataFrame, col: str, prefix: str, categories: list, na
 def main():
     # Validate arguments
     if len(sys.argv) != 3:
-        logger.error("Arguments error. Usage: \tpython featurize.py <input_folder_path> <output_folder_path>\n")
+        logger.error(
+            "Arguments error. Usage: \tpython featurize.py <input_folder_path> <output_folder_path>\n"
+        )
         sys.exit(1)
 
     input_folder_path = Path(sys.argv[1])
@@ -103,7 +115,7 @@ def main():
     output_folder_path.mkdir(parents=True, exist_ok=True)
 
     # Load parameters
-    with open("params.yaml") as f:
+    with open("params.yaml", encoding="utf-8") as f:
         params = yaml.safe_load(f)
     target = params["global"]["target"]
     categorical_max_unique = params["featurize"]["categorical_max_unique"]
