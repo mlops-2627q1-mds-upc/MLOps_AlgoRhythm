@@ -1,9 +1,6 @@
-import sys
-
 import numpy as np
 import pandas as pd
 import pytest
-import yaml
 
 from src.data.preprocess import (
     change_type,

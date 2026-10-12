@@ -1,16 +1,11 @@
-import sys
-
 import numpy as np
 import pandas as pd
 import pytest
-import yaml
 
-from src.config import TEST_FILE, TRAIN_FILE
 from src.data.featurize import (
     apply_imputer,
     classify_variables,
     fit_imputer,
-    main,
     one_hot_encode,
 )
 
