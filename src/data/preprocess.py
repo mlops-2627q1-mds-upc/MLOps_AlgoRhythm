@@ -26,6 +26,9 @@ import pandas as pd
 import yaml
 import sys
 
+def change_type(df) -> pd.DataFrame:
+     df['explicit'] = df['explicit'].astype(int)
+     return df
 
 def drop_duplicates(df) -> pd.DataFrame:
     """
@@ -38,7 +41,7 @@ def drop_duplicates(df) -> pd.DataFrame:
     logger.info("Shape after removing duplicates: {}", df.shape)
     
     return df
-
+    
 
 def drop_columns_empty(df, missing_drop_threshold:float) -> pd.DataFrame:
     """
@@ -118,9 +121,8 @@ def main():
     df = pd.read_csv(input_path)
     logger.info("Loaded dataset from {}: {} rows x {} columns", input_path, f"{df.shape[0]:,}", df.shape[1])
 
-    df['explicit'] = df['explicit'].astype(int)
-
     # Apply transformations
+    df = change_type(df)
     df = drop_duplicates(df)
     df = drop_columns_empty(df, missing_drop_threshold)
     df = drop_rows_no_target(df, target)
