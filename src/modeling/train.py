@@ -99,10 +99,20 @@ def main(
         gpu_count = getattr(data, "gpu_count", 0)
         
         
+        cpu_energy = getattr(data, "cpu_energy", 0.0)
+        gpu_energy = getattr(data, "gpu_energy", 0.0)
+        ram_energy = getattr(data, "ram_energy", 0.0)
+        if gpu_energy is not None and gpu_energy > 0.0000001:
+            training_device = "GPU"
+        else:
+            training_device = "CPU"
+        
+        
         mlflow.log_metric("co2_emissions_kg", emissions_kg if emissions_kg else 0.0)
         mlflow.log_metric("energy_consumed_kwh", energy_kwh if energy_kwh else 0.0)
         mlflow.log_metric("compute_duration_seconds", duration_sec if duration_sec else 0.0)
         
+        mlflow.log_param("training_device", training_device)
         mlflow.log_param("cpu_model", str(cpu_model))
         mlflow.log_param("cpu_count", int(cpu_count))
         mlflow.log_param("gpu_model", str(gpu_model))
