@@ -14,30 +14,46 @@ def main(raw_path: str, preprocessed_path: str, report_path: str) -> None:
     z_threshold = params["preprocess"]["z_threshold"]
     outlier_cols = params["preprocess"]["outlier_cols"]
     cols_to_drop = params["preprocess"]["cols_to_drop"]
+    missing_drop_threshold = params.get("preprocess", {}).get("missing_drop_threshold", 0.5)
 
     out = pd.read_csv(preprocessed_path)
+    df_raw = pd.read_csv(raw_path)
 
-    # Target column must never be null
+    # 1. Validar que no existan filas totalmente duplicadas
+    if out.duplicated().sum() > 0:
+        raise AssertionError("El dataset preprocesado contiene filas duplicadas.")
+
     expectations = [
+        # El target nunca debe ser nulo
         gxe.ExpectColumnValuesToNotBeNull(column=target),
     ]
 
-    # Non-informative columns were dropped
+    # 2. Validar que las columnas no informativas fueron eliminadas
     for col in cols_to_drop:
-        if col in out.columns:
-            raise AssertionError(f"Column '{col}' should have been dropped during preprocessing.")
+        expectations.append(gxe.ExpectColumnToNotExist(column=col))
 
-    # Validate categorical/binary column 'explicit'
+    # 3. Validar columnas remanentes respecto al porcentaje máximo de nulos permitidos (ej. 50% o missing_drop_threshold)
+    max_missing_allowed = max(0.5, missing_drop_threshold)
+    min_not_null_ratio = 1.0 - max_missing_allowed
+    for col in out.columns:
+        expectations.append(
+            gxe.ExpectColumnValuesToNotBeNull(
+                column=col,
+                mostly=min_not_null_ratio
+            )
+        )
+
+    # 4. Validar columna categórica/binaria 'explicit'
     if "explicit" in out.columns:
         expectations += [
             gxe.ExpectColumnValuesToBeOfType(column="explicit", type_="int64"),
             gxe.ExpectColumnValuesToBeInSet(column="explicit", value_set=[0, 1]),
         ]
         
-    # Outlier validation
+    # 5. Validación de Outliers basada en el dataset original (raw)[cite: 1, 2]
     margin = float(z_threshold) * (1 + 1e-9)
-    mean = out[outlier_cols].mean()
-    std = out[outlier_cols].std()
+    mean = df_raw[outlier_cols].mean()
+    std = df_raw[outlier_cols].std()
 
     for c in outlier_cols:
         if c in out.columns and std[c] > 0:
