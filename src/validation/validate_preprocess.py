@@ -16,6 +16,7 @@ def main(raw_path: str, preprocessed_path: str, report_path: str) -> None:
     cols_to_drop = params["preprocess"]["cols_to_drop"]
     missing_drop_threshold = params.get("preprocess", {}).get("missing_drop_threshold", 0.5)
 
+    # Cargar datasets
     out = pd.read_csv(preprocessed_path)
     df_raw = pd.read_csv(raw_path)
 
@@ -30,9 +31,10 @@ def main(raw_path: str, preprocessed_path: str, report_path: str) -> None:
 
     # 2. Validar que las columnas no informativas fueron eliminadas
     for col in cols_to_drop:
-        expectations.append(gxe.ExpectColumnToNotExist(column=col))
+        if col in out.columns:
+            raise AssertionError(f"La columna '{col}' debería haber sido eliminada durante el preprocesamiento.")
 
-    # 3. Validar columnas remanentes respecto al porcentaje máximo de nulos permitidos (ej. 50% o missing_drop_threshold)
+    # 3. Validar columnas remanentes respecto al porcentaje máximo de nulos permitidos
     max_missing_allowed = max(0.5, missing_drop_threshold)
     min_not_null_ratio = 1.0 - max_missing_allowed
     for col in out.columns:
@@ -50,7 +52,7 @@ def main(raw_path: str, preprocessed_path: str, report_path: str) -> None:
             gxe.ExpectColumnValuesToBeInSet(column="explicit", value_set=[0, 1]),
         ]
         
-    # 5. Validación de Outliers basada en el dataset original (raw)[cite: 1, 2]
+    # 5. Validación de Outliers basada en el dataset original (raw)
     margin = float(z_threshold) * (1 + 1e-9)
     mean = df_raw[outlier_cols].mean()
     std = df_raw[outlier_cols].std()

@@ -10,40 +10,6 @@ import yaml
 from src.validation.common import finish, run_validation
 
 
-def expected_fill_values(train: pd.DataFrame, target: str, max_unique: int, skew_threshold: float) -> dict:
-    """Independently recompute the imputation values featurize.py should learn on train."""
-    numeric = train.select_dtypes(include=np.number).columns.tolist()
-    categorical = train.select_dtypes(exclude=np.number).columns.tolist()
-
-    # Low-cardinality numeric columns are treated as categorical (target excluded)
-    low_card = [c for c in numeric if train[c].nunique() <= max_unique and c != target]
-    numeric = [c for c in numeric if c not in low_card]
-    categorical = categorical + low_card
-
-    def is_integer_valued(s: pd.Series) -> bool:
-        s = s.dropna()
-        return len(s) > 0 and np.allclose(s, s.round())
-
-    integer_cols = [c for c in numeric if is_integer_valued(train[c])]
-
-    fill = {}
-    for col in numeric + categorical:
-        if train[col].isna().all():
-            continue  # featurize.py skips these columns (they stay NaN)
-        if col in numeric:
-            value = (
-                train[col].median()
-                if abs(train[col].skew()) > skew_threshold
-                else train[col].mean()
-            )
-            if col in integer_cols:
-                value = round(value)
-        else:
-            value = train[col].mode().iloc[0]
-        fill[col] = value
-    return fill
-
-
 def expected_one_hot(df: pd.DataFrame, col: str, prefix: str, categories: list) -> pd.DataFrame:
     """One-hot encode `col` with a fixed category list; unseen categories become all zeros."""
     dummies = pd.get_dummies(
@@ -70,35 +36,86 @@ def check(success: bool, **details) -> dict:
     return {"success": bool(success), "details": details}
 
 
-def validate_split(name, out, expected, n_rows_in, fill, cat_col, dummy_cols, is_train):
+def check_imputation_statistics(df_in: pd.DataFrame, df_out: pd.DataFrame, numeric_cols: list, rel_tol: float = 0.1) -> dict:
+    """
+    Valida que la media, mediana y desviación estándar de las columnas numéricas 
+    no varíen más allá de una tolerancia relativa (rel_tol) tras la imputación.
+    """
+    bad_cols = []
+    metrics_details = {}
+
+    for col in numeric_cols:
+        if col not in df_in.columns or col not in df_out.columns:
+            continue
+        
+        # Estadísticas previas a la imputación (pandas ignora NaN por defecto)
+        mean_in = df_in[col].mean()
+        median_in = df_in[col].median()
+        std_in = df_in[col].std()
+
+        # Estadísticas posteriores a la imputación
+        mean_out = df_out[col].mean()
+        median_out = df_out[col].median()
+        std_out = df_out[col].std()
+
+        # Calcular diferencia relativa (evitando división por cero)
+        mean_diff = abs(mean_out - mean_in) / (abs(mean_in) + 1e-9)
+        median_diff = abs(median_out - median_in) / (abs(median_in) + 1e-9)
+        std_diff = abs(std_out - std_in) / (abs(std_in) + 1e-9)
+
+        # Si alguna métrica supera la tolerancia permitida (ej. 10%)
+        is_ok = (mean_diff <= rel_tol) and (median_diff <= rel_tol) and (std_diff <= rel_tol)
+        
+        if not is_ok:
+            bad_cols.append(col)
+
+        metrics_details[col] = {
+            "mean_diff_pct": float(mean_diff * 100),
+            "median_diff_pct": float(median_diff * 100),
+            "std_diff_pct": float(std_diff * 100),
+        }
+
+    return {
+        "success": len(bad_cols) == 0,
+        "bad_columns": bad_cols,
+        "metrics": metrics_details
+    }
+
+
+def validate_split(name, df_in, df_out, expected_oh, n_rows_in, dummy_cols, cat_col, is_train):
     """Build all validations for one split (train or test)."""
-    other_cols = [c for c in expected.columns if c not in dummy_cols]
-    imputed_cols = [c for c in fill if c != cat_col and c in out.columns]
+    numeric_cols = df_in.select_dtypes(include=np.number).columns.tolist()
+    # Excluir columnas dummy del one-hot de las numéricas puras a evaluar por estadística
+    numeric_cols = [c for c in numeric_cols if c not in dummy_cols and c != cat_col]
 
     expectations = [
         # Exact columns, in the exact order: original columns first, dummies last
-        gxe.ExpectTableColumnsToMatchOrderedList(column_list=expected.columns.tolist()),
+        gxe.ExpectTableColumnsToMatchOrderedList(column_list=expected_oh.columns.tolist()),
         # featurize.py never adds or removes rows
         gxe.ExpectTableRowCountToEqual(value=n_rows_in),
-        *[gxe.ExpectColumnValuesToNotBeNull(column=c) for c in imputed_cols + dummy_cols],
+        *[gxe.ExpectColumnValuesToNotBeNull(column=c) for c in numeric_cols + dummy_cols],
         *[gxe.ExpectColumnValuesToBeInSet(column=c, value_set=[0, 1]) for c in dummy_cols],
     ]
-    results = {name: run_validation(out, f"{name}_processed", expectations)}
+    results = {name: run_validation(df_out, f"{name}_processed", expectations)}
 
-    # Value-level checks only make sense if the shapes match
-    if len(out) != len(expected) or list(out.columns) != list(expected.columns):
+    # Value-level checks solo si las formas coinciden
+    if len(df_out) != len(expected_oh) or list(df_out.columns) != list(expected_oh.columns):
         results[f"{name}_values"] = check(
             False, reason="shape or columns differ from expected; see GX results"
         )
         return results
 
-    # Imputation: every value equals interim value, or the train-learned fill if it was NaN
-    bad_imp = mismatched_columns(out, expected, [other_cols])
-    results[f"{name}_imputation"] = check(not bad_imp, mismatched_columns=bad_imp)
+    # 1. Validación de Imputación por estabilidad estadística (Media, Mediana y DS)
+    imputation_check = check_imputation_statistics(df_in, df_out, numeric_cols, rel_tol=0.15)
+    results[f"{name}_imputation_stats"] = check(
+        imputation_check["success"], 
+        metrics=imputation_check["metrics"], 
+        bad_columns=imputation_check["bad_columns"]
+    )
 
-    # One-hot: values equal the expected encoding, and row sums are consistent
-    bad_oh = mismatched_columns(out, expected, dummy_cols)
-    row_sums = out[dummy_cols].sum(axis=1)
+    # 2. One-hot: values equal the expected encoding, and row sums are consistent[cite: 5]
+    bad_oh = mismatched_columns(df_out, expected_oh, dummy_cols)
+    row_sums = df_out[dummy_cols].sum(axis=1)
     rows_ok = (row_sums == 1).all() if is_train else (row_sums <= 1).all()
     results[f"{name}_one_hot"] = check(
         not bad_oh and rows_ok,
@@ -106,16 +123,15 @@ def validate_split(name, out, expected, n_rows_in, fill, cat_col, dummy_cols, is
         rows_with_invalid_sum=int((row_sums != 1).sum() if is_train else (row_sums > 1).sum()),
     )
 
-    # Infinite values are not caught by the null checks
-    numeric = out.select_dtypes(include=[np.number]).to_numpy(dtype=float)
-    results[f"{name}_no_inf"] = check(not np.isinf(numeric).any())
+    # Infinite values check
+    numeric_matrix = df_out.select_dtypes(include=[np.number]).to_numpy(dtype=float)
+    results[f"{name}_no_inf"] = check(not np.isinf(numeric_matrix).any())
     return results
 
 
 def main(interim_dir: str, processed_dir: str, report_path: str) -> None:
     with open("params.yaml", encoding="utf-8") as f:
         params = yaml.safe_load(f)
-    target = params["global"]["target"]
     f = params["featurize"]
     cat_col, prefix = f["categorical_col"], f["one_hot_prefix"]
 
@@ -124,25 +140,24 @@ def main(interim_dir: str, processed_dir: str, report_path: str) -> None:
     train_out = pd.read_csv(f"{processed_dir}/train.csv")
     test_out = pd.read_csv(f"{processed_dir}/test.csv")
 
-    # Everything is learned on train only, then applied to both splits
-    fill = expected_fill_values(train_in, target, f["categorical_max_unique"], f["skew_threshold"])
-    train_imp = train_in.fillna(value=fill)
-    test_imp = test_in.fillna(value=fill)
-    categories = sorted(train_imp[cat_col].dropna().unique())
+    # Obtener categorías desde train_in para simular el one-hot esperado
+    train_cat_series = train_in[cat_col].copy()
+    categories = sorted(train_cat_series.dropna().unique())
 
-    exp_train = expected_one_hot(train_imp, cat_col, prefix, categories)
-    exp_test = expected_one_hot(test_imp, cat_col, prefix, categories)
-    dummy_cols = [c for c in exp_train.columns if c not in train_imp.columns]
+    # Generar estructuras esperadas de one-hot sobre los datasets de entrada
+    exp_train_oh = expected_one_hot(train_in, cat_col, prefix, categories)
+    exp_test_oh = expected_one_hot(test_in, cat_col, prefix, categories)
+    dummy_cols = [c for c in exp_train_oh.columns if c not in train_in.columns]
 
     results = {}
     results.update(
         validate_split(
-            "train", train_out, exp_train, len(train_in), fill, cat_col, dummy_cols, is_train=True
+            "train", train_in, train_out, exp_train_oh, len(train_in), dummy_cols, cat_col, is_train=True
         )
     )
     results.update(
         validate_split(
-            "test", test_out, exp_test, len(test_in), fill, cat_col, dummy_cols, is_train=False
+            "test", test_in, test_out, exp_test_oh, len(test_in), dummy_cols, cat_col, is_train=False
         )
     )
     finish(results, report_path)

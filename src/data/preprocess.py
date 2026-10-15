@@ -107,12 +107,13 @@ def remove_outliers(df, cols: list[str], z_threshold: float) -> pd.DataFrame:
 
 def main():
     # Validate arguments
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         logger.error("Arguments error. Usage: \tpython preprocess.py <input_path> <output_path>\n")
         sys.exit(1)
 
     input_path = sys.argv[1]
-    output_path = sys.argv[2]
+    inter_path = sys.argv[2]
+    output_path = sys.argv[3]
 
     # Load parameters
     with open("params.yaml", encoding="utf-8") as f:
@@ -136,6 +137,11 @@ def main():
     df = drop_rows_no_target(df, target)
     df = drop_columns_not_informative(df, cols_to_drop)
     df = drop_duplicates(df)
+    
+    # Save dataset for outlier validation
+    df.to_csv(inter_path, index=False)
+    logger.info("Intermediate dataset saved to {}", inter_path)
+    
     df = remove_outliers(df, outlier_cols, z_threshold)
 
     # Save dataset

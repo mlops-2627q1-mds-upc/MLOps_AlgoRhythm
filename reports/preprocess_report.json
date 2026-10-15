@@ -1,13 +1,13 @@
 {
   "preprocess": {
-    "success": false,
+    "success": true,
     "details": {
-      "success": false,
+      "success": true,
       "statistics": {
-        "evaluated_expectations": 6,
-        "successful_expectations": 3,
-        "unsuccessful_expectations": 3,
-        "success_percent": 50.0
+        "evaluated_expectations": 22,
+        "successful_expectations": 22,
+        "unsuccessful_expectations": 0,
+        "success_percent": 100.0
       },
       "expectations": [
         {
@@ -18,7 +18,80 @@
             "column": "popularity"
           },
           "result": {
-            "element_count": 108646,
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "popularity",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "duration_ms",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_be_between",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "duration_ms",
+            "min_value": -95657.66264266014,
+            "max_value": 555643.4415158865
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_percent_total": 0.0,
+            "unexpected_percent_nonmissing": 0.0,
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "explicit",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
             "unexpected_count": 0,
             "unexpected_percent": 0.0,
             "partial_unexpected_list": [],
@@ -50,7 +123,7 @@
             ]
           },
           "result": {
-            "element_count": 108646,
+            "element_count": 101879,
             "unexpected_count": 0,
             "unexpected_percent": 0.0,
             "partial_unexpected_list": [],
@@ -63,406 +136,268 @@
           }
         },
         {
-          "expectation_type": "expect_column_values_to_be_between",
-          "success": false,
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
           "kwargs": {
             "batch_id": "pandas-preprocess",
-            "column": "duration_ms",
-            "min_value": -5947.318371740344,
-            "max_value": 454796.0358026628
+            "column": "danceability",
+            "mostly": 0.5
           },
           "result": {
-            "element_count": 108646,
-            "unexpected_count": 1541,
-            "unexpected_percent": 1.4183679104614988,
-            "partial_unexpected_list": [
-              527506,
-              527506,
-              527506,
-              527506,
-              527506,
-              479053,
-              505973,
-              470837,
-              478197,
-              523453,
-              479204,
-              468693,
-              457539,
-              463920,
-              494532,
-              480146,
-              540346,
-              499733,
-              460120,
-              482786
-            ],
-            "missing_count": 0,
-            "missing_percent": 0.0,
-            "unexpected_percent_total": 1.4183679104614988,
-            "unexpected_percent_nonmissing": 1.4183679104614988,
-            "partial_unexpected_counts": [
-              {
-                "value": 527506,
-                "count": 5
-              },
-              {
-                "value": 457539,
-                "count": 1
-              },
-              {
-                "value": 460120,
-                "count": 1
-              },
-              {
-                "value": 463920,
-                "count": 1
-              },
-              {
-                "value": 468693,
-                "count": 1
-              },
-              {
-                "value": 470837,
-                "count": 1
-              },
-              {
-                "value": 478197,
-                "count": 1
-              },
-              {
-                "value": 479053,
-                "count": 1
-              },
-              {
-                "value": 479204,
-                "count": 1
-              },
-              {
-                "value": 480146,
-                "count": 1
-              },
-              {
-                "value": 482786,
-                "count": 1
-              },
-              {
-                "value": 494532,
-                "count": 1
-              },
-              {
-                "value": 499733,
-                "count": 1
-              },
-              {
-                "value": 505973,
-                "count": 1
-              },
-              {
-                "value": 523453,
-                "count": 1
-              },
-              {
-                "value": 540346,
-                "count": 1
-              }
-            ],
-            "partial_unexpected_index_list": [
-              1083,
-              1089,
-              1128,
-              1137,
-              1140,
-              1229,
-              1274,
-              1292,
-              1382,
-              1389,
-              1511,
-              1552,
-              1557,
-              1585,
-              1694,
-              1723,
-              1773,
-              1774,
-              1776,
-              1827
-            ]
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
           }
         },
         {
-          "expectation_type": "expect_column_values_to_be_between",
-          "success": false,
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "energy",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "key",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
           "kwargs": {
             "batch_id": "pandas-preprocess",
             "column": "loudness",
-            "min_value": -19.75986797187738,
-            "max_value": 4.241696810490859
+            "mostly": 0.5
           },
           "result": {
-            "element_count": 108646,
-            "unexpected_count": 1820,
-            "unexpected_percent": 1.6751652154704268,
-            "partial_unexpected_list": [
-              -19.836,
-              -21.56,
-              -20.858,
-              -19.928,
-              -19.933,
-              -21.441,
-              -20.176,
-              -19.883,
-              -20.674,
-              -20.33,
-              -20.442,
-              -21.651,
-              -20.8,
-              -19.974,
-              -22.587,
-              -20.519,
-              -21.792,
-              -20.811,
-              -20.811,
-              -22.837
-            ],
-            "missing_count": 0,
-            "missing_percent": 0.0,
-            "unexpected_percent_total": 1.6751652154704268,
-            "unexpected_percent_nonmissing": 1.6751652154704268,
-            "partial_unexpected_counts": [
-              {
-                "value": -20.811,
-                "count": 2
-              },
-              {
-                "value": -22.837,
-                "count": 1
-              },
-              {
-                "value": -22.587,
-                "count": 1
-              },
-              {
-                "value": -21.792,
-                "count": 1
-              },
-              {
-                "value": -21.651,
-                "count": 1
-              },
-              {
-                "value": -21.56,
-                "count": 1
-              },
-              {
-                "value": -21.441,
-                "count": 1
-              },
-              {
-                "value": -20.858,
-                "count": 1
-              },
-              {
-                "value": -20.8,
-                "count": 1
-              },
-              {
-                "value": -20.674,
-                "count": 1
-              },
-              {
-                "value": -20.519,
-                "count": 1
-              },
-              {
-                "value": -20.442,
-                "count": 1
-              },
-              {
-                "value": -20.33,
-                "count": 1
-              },
-              {
-                "value": -20.176,
-                "count": 1
-              },
-              {
-                "value": -19.974,
-                "count": 1
-              },
-              {
-                "value": -19.933,
-                "count": 1
-              },
-              {
-                "value": -19.928,
-                "count": 1
-              },
-              {
-                "value": -19.883,
-                "count": 1
-              },
-              {
-                "value": -19.836,
-                "count": 1
-              }
-            ],
-            "partial_unexpected_index_list": [
-              116,
-              281,
-              350,
-              351,
-              399,
-              437,
-              448,
-              652,
-              801,
-              855,
-              919,
-              952,
-              1328,
-              3997,
-              4022,
-              4036,
-              4038,
-              4039,
-              4040,
-              4041
-            ]
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
           }
         },
         {
           "expectation_type": "expect_column_values_to_be_between",
-          "success": false,
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "loudness",
+            "min_value": -23.48527621719284,
+            "max_value": 6.8805697152799645
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_percent_total": 0.0,
+            "unexpected_percent_nonmissing": 0.0,
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "mode",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
           "kwargs": {
             "batch_id": "pandas-preprocess",
             "column": "speechiness",
-            "min_value": -0.1250093437760006,
-            "max_value": 0.2743576824170918
+            "mostly": 0.5
           },
           "result": {
-            "element_count": 108646,
-            "unexpected_count": 3337,
-            "unexpected_percent": 3.0714430351784694,
-            "partial_unexpected_list": [
-              0.345,
-              0.281,
-              0.316,
-              0.319,
-              0.284,
-              0.333,
-              0.337,
-              0.298,
-              0.289,
-              0.276,
-              0.322,
-              0.31,
-              0.336,
-              0.31,
-              0.296,
-              0.357,
-              0.382,
-              0.316,
-              0.316,
-              0.312
-            ],
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_be_between",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "speechiness",
+            "min_value": -0.237402369429406,
+            "max_value": 0.4083552125547392
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
             "missing_count": 0,
             "missing_percent": 0.0,
-            "unexpected_percent_total": 3.0714430351784694,
-            "unexpected_percent_nonmissing": 3.0714430351784694,
-            "partial_unexpected_counts": [
-              {
-                "value": 0.316,
-                "count": 3
-              },
-              {
-                "value": 0.31,
-                "count": 2
-              },
-              {
-                "value": 0.276,
-                "count": 1
-              },
-              {
-                "value": 0.281,
-                "count": 1
-              },
-              {
-                "value": 0.284,
-                "count": 1
-              },
-              {
-                "value": 0.289,
-                "count": 1
-              },
-              {
-                "value": 0.296,
-                "count": 1
-              },
-              {
-                "value": 0.298,
-                "count": 1
-              },
-              {
-                "value": 0.312,
-                "count": 1
-              },
-              {
-                "value": 0.319,
-                "count": 1
-              },
-              {
-                "value": 0.322,
-                "count": 1
-              },
-              {
-                "value": 0.333,
-                "count": 1
-              },
-              {
-                "value": 0.336,
-                "count": 1
-              },
-              {
-                "value": 0.337,
-                "count": 1
-              },
-              {
-                "value": 0.345,
-                "count": 1
-              },
-              {
-                "value": 0.357,
-                "count": 1
-              },
-              {
-                "value": 0.382,
-                "count": 1
-              }
-            ],
-            "partial_unexpected_index_list": [
-              994,
-              999,
-              1002,
-              1003,
-              1004,
-              1005,
-              1007,
-              1010,
-              1012,
-              1016,
-              1039,
-              1040,
-              1065,
-              1067,
-              1073,
-              1268,
-              1334,
-              1390,
-              1530,
-              1555
-            ]
+            "unexpected_percent_total": 0.0,
+            "unexpected_percent_nonmissing": 0.0,
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "acousticness",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "instrumentalness",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "liveness",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "valence",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "tempo",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "time_signature",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "track_genre",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
           }
         }
       ],
