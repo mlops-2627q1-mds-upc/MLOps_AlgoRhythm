@@ -4,10 +4,6 @@ stages:
     cmd: python src/data/preprocess.py data/raw/dataset.csv 
       data/interim/inter_data.csv data/interim/dataset_preprocessed.csv
     deps:
-    - path: data/interim/inter_data.csv
-      hash: md5
-      md5: c5f0d78d55ac1c4bf5f4f0595a00fef4
-      size: 9027443
     - path: data/raw/dataset.csv
       hash: md5
       md5: e50a70711e823b75c8ebe231468f5faf
@@ -36,6 +32,10 @@ stages:
       hash: md5
       md5: f53e0c33fc14d3ac302d0e2996a7fda5
       size: 8608614
+    - path: data/interim/inter_data.csv
+      hash: md5
+      md5: c5f0d78d55ac1c4bf5f4f0595a00fef4
+      size: 9027443
   split-data:
     cmd: python src/data/split_data.py data/interim/dataset_preprocessed.csv 
       data/interim

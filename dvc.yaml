@@ -4,7 +4,6 @@ stages:
       data/interim/inter_data.csv data/interim/dataset_preprocessed.csv
     deps:
     - data/raw/dataset.csv
-    - data/interim/inter_data.csv
     - src/data/preprocess.py
     params:
     - preprocess.cols_to_drop
@@ -13,6 +12,7 @@ stages:
     - preprocess.z_threshold
     - global.target
     outs:
+    - data/interim/inter_data.csv
     - data/interim/dataset_preprocessed.csv
   validate-preprocess:
     cmd: python src/validation/validate_preprocess.py data/interim/inter_data.csv
