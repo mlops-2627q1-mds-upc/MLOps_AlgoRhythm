@@ -7,6 +7,10 @@ import yaml
 
 from src.validation.common import finish
 
+def row_hashes(df: pd.DataFrame) -> pd.Series:
+    """One hash per row, ignoring the index, so rows can be compared across DataFrames."""
+    return pd.util.hash_pandas_object(df, index=False)
+
 
 def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
     # 1. Cargar parámetros desde params.yaml
@@ -54,6 +58,20 @@ def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
                 "expected_rows": round(n_total * test_split_target),
                 "actual_rows": n_test,
             },
+        },
+        "row_conservation" = {
+            "success": n_train + n_test == n_total,
+            "details": {
+                "n_total": n_total,
+                "n_train": n_train,
+                "n_test": n_test,
+                "difference": n_total - (n_train + n_test),
+            },
+        },
+        overlap = set(row_hashes(train)) & set(row_hashes(test))
+        "train_test_overlap" = {
+            "success": len(overlap) == 0,
+            "details": {"overlapping_rows": len(overlap)},
         },
     }
 

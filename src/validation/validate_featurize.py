@@ -100,7 +100,7 @@ def validate_split(name, df_in, df_out, expected_oh, n_rows_in, dummy_cols, cat_
         return results
 
     # 1. Validación de Imputación por estabilidad estadística (Media, Mediana y DS)
-    imputation_check = check_imputation_statistics(df_in, df_out, numeric_cols, rel_tol=0.15)
+    imputation_check = check_imputation_statistics(df_in, df_out, numeric_cols, rel_tol=0.1)
     results[f"{name}_imputation_stats"] = check(
         imputation_check["success"], metrics=imputation_check["metrics"], bad_columns=imputation_check["bad_columns"]
     )

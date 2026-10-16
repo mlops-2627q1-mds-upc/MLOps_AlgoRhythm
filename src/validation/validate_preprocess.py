@@ -13,6 +13,7 @@ def main(raw_path: str, preprocessed_path: str, report_path: str) -> None:
     with open("params.yaml", encoding="utf-8") as f:
         params = yaml.safe_load(f)
     target = params["global"]["target"]
+    missing_drop_threshold = params["preprocess"]["missing_drop_threshold"]
     z_threshold = params["preprocess"]["z_threshold"]
     outlier_cols = params["preprocess"]["outlier_cols"]
     cols_to_drop = params["preprocess"]["cols_to_drop"]
@@ -37,7 +38,7 @@ def main(raw_path: str, preprocessed_path: str, report_path: str) -> None:
             raise AssertionError(f"La columna '{col}' debería haber sido eliminada durante el preprocesamiento.")
 
     # 3. Validar columnas remanentes respecto al porcentaje máximo de nulos permitidos
-    max_missing_allowed = max(0.5, missing_drop_threshold)
+    max_missing_allowed = missing_drop_threshold
     min_not_null_ratio = 1.0 - max_missing_allowed
     for col in out.columns:
         expectations.append(gxe.ExpectColumnValuesToNotBeNull(column=col, mostly=min_not_null_ratio))
