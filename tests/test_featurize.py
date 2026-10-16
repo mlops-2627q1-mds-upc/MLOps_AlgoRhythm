@@ -37,19 +37,16 @@ def test_classify_variables_integer_cols_only_include_integer_valued_numerics():
     assert "whole" in integer_cols
     assert "fractional" not in integer_cols
 
+
 # fit_imputer
 def test_fit_imputer_uses_mean_for_symmetric_columns():
-    train = pd.DataFrame(
-        {"a": [10.5, 20.5, 30.5, np.nan], "target": [1.0, 2.0, 3.0, 4.0]}
-    )
+    train = pd.DataFrame({"a": [10.5, 20.5, 30.5, np.nan], "target": [1.0, 2.0, 3.0, 4.0]})
     fill = fit_imputer(train, "target", categorical_max_unique=2, skew_threshold=1.0)
     assert fill["a"] == pytest.approx(20.5)  # mean, not integer-valued -> not rounded
 
 
 def test_fit_imputer_uses_median_for_skewed_columns():
-    train = pd.DataFrame(
-        {"a": [1.5, 1.5, 1.5, 1.5, 100.5, np.nan], "target": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]}
-    )
+    train = pd.DataFrame({"a": [1.5, 1.5, 1.5, 1.5, 100.5, np.nan], "target": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]})
     fill = fit_imputer(train, "target", categorical_max_unique=1, skew_threshold=1.0)
     assert fill["a"] == pytest.approx(1.5)  # median; the mean would be ~21
 
@@ -73,12 +70,11 @@ def test_fit_imputer_uses_mode_for_categorical_columns():
 
 
 def test_fit_imputer_skips_columns_entirely_missing_in_train():
-    train = pd.DataFrame(
-        {"empty": [np.nan] * 4, "a": [1.5, 2.5, 3.5, 4.5], "target": [1.0, 2.0, 3.0, 4.0]}
-    )
+    train = pd.DataFrame({"empty": [np.nan] * 4, "a": [1.5, 2.5, 3.5, 4.5], "target": [1.0, 2.0, 3.0, 4.0]})
     fill = fit_imputer(train, "target", categorical_max_unique=2, skew_threshold=1.0)
     assert "empty" not in fill
     assert "a" in fill
+
 
 # apply_imputer
 def test_apply_imputer_uses_train_values_not_test_statistics():
@@ -99,6 +95,7 @@ def test_apply_imputer_leaves_nans_in_columns_without_fill_value():
     out = apply_imputer(test, {"a": 9.0}, "test")
     assert out["empty_in_train"].isna().all()
     assert out["a"].tolist() == [9.0, 1.0]
+
 
 # one_hot_encode
 def test_one_hot_encode_creates_prefixed_int_columns_at_the_end():

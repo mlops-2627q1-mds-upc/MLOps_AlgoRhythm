@@ -43,6 +43,8 @@ force-sort-within-sections = true
 [tool.pylint.main]
 source-roots = ["src"]
 recursive = true
+ignore = [".venv", ".dvc", "node_modules"]
+ignore-paths = ["^\\.venv/.*", "^\\.dvc/.*"]
 
 [tool.pylint.messages_control]
 disable = [
