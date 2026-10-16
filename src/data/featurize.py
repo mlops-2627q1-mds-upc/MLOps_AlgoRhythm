@@ -17,9 +17,7 @@ def classify_variables(df, target: str, categorical_max_unique: int) -> tuple[li
     numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
     categorical_cols = df.select_dtypes(exclude=np.number).columns.tolist()
 
-    low_card_numeric = [
-        c for c in numeric_cols if df[c].nunique() <= categorical_max_unique and c != target
-    ]
+    low_card_numeric = [c for c in numeric_cols if df[c].nunique() <= categorical_max_unique and c != target]
     numeric_cols = [c for c in numeric_cols if c not in low_card_numeric]
     categorical_cols = categorical_cols + low_card_numeric
 
@@ -37,9 +35,7 @@ def fit_imputer(train_df: pd.DataFrame, target: str, categorical_max_unique: int
     (median/mean for numeric columns, mode for categorical ones).
     Returns a {column: fill_value} dict.
     """
-    numeric_cols, categorical_cols, integer_cols = classify_variables(
-        train_df, target, categorical_max_unique
-    )
+    numeric_cols, categorical_cols, integer_cols = classify_variables(train_df, target, categorical_max_unique)
 
     fill_values = {}
     for col in numeric_cols + categorical_cols:
@@ -99,9 +95,7 @@ def one_hot_encode(df: pd.DataFrame, col: str, prefix: str, categories: list, na
 def main():
     # Validate arguments
     if len(sys.argv) != 3:
-        logger.error(
-            "Arguments error. Usage: \tpython featurize.py <input_folder_path> <output_folder_path>\n"
-        )
+        logger.error("Arguments error. Usage: \tpython featurize.py <input_folder_path> <output_folder_path>\n")
         sys.exit(1)
 
     input_folder_path = Path(sys.argv[1])

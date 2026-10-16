@@ -1,16 +1,18 @@
+# pylint: disable=too-many-locals
+
 import sys
 
 import pandas as pd
 import yaml
 
-from src.validation.common import finish, run_validation
+from src.validation.common import finish
 
 
 def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
     # 1. Cargar parámetros desde params.yaml
     with open("params.yaml", encoding="utf-8") as f:
         params = yaml.safe_load(f)
-    
+
     train_split_target = params["split-data"]["train_split"]
     test_split_target = params["split-data"]["test_split"]
 
@@ -41,8 +43,8 @@ def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
                 "expected_ratio": train_split_target,
                 "actual_ratio": actual_train_ratio,
                 "expected_rows": round(n_total * train_split_target),
-                "actual_rows": n_train
-            }
+                "actual_rows": n_train,
+            },
         },
         "test_proportion": {
             "success": test_proportional_success,
@@ -50,9 +52,9 @@ def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
                 "expected_ratio": test_split_target,
                 "actual_ratio": actual_test_ratio,
                 "expected_rows": round(n_total * test_split_target),
-                "actual_rows": n_test
-            }
-        }
+                "actual_rows": n_test,
+            },
+        },
     }
 
     # 6. Finalizar y generar reporte

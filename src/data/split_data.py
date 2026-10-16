@@ -15,9 +15,7 @@ def main():
     """
     # Validate arguments
     if len(sys.argv) != 3:
-        logger.error(
-            "Arguments error. Usage: \tpython split_data.py <input_path> <output_folder_path>\n"
-        )
+        logger.error("Arguments error. Usage: \tpython split_data.py <input_path> <output_folder_path>\n")
         sys.exit(1)
 
     input_path = Path(sys.argv[1])

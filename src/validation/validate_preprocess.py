@@ -1,3 +1,5 @@
+# pylint: disable=too-many-locals
+
 import sys
 
 import great_expectations.expectations as gxe
@@ -38,12 +40,7 @@ def main(raw_path: str, preprocessed_path: str, report_path: str) -> None:
     max_missing_allowed = max(0.5, missing_drop_threshold)
     min_not_null_ratio = 1.0 - max_missing_allowed
     for col in out.columns:
-        expectations.append(
-            gxe.ExpectColumnValuesToNotBeNull(
-                column=col,
-                mostly=min_not_null_ratio
-            )
-        )
+        expectations.append(gxe.ExpectColumnValuesToNotBeNull(column=col, mostly=min_not_null_ratio))
 
     # 4. Validar columna categórica/binaria 'explicit'
     if "explicit" in out.columns:
@@ -51,7 +48,7 @@ def main(raw_path: str, preprocessed_path: str, report_path: str) -> None:
             gxe.ExpectColumnValuesToBeOfType(column="explicit", type_="int64"),
             gxe.ExpectColumnValuesToBeInSet(column="explicit", value_set=[0, 1]),
         ]
-        
+
     # 5. Validación de Outliers basada en el dataset original (raw)
     margin = float(z_threshold) * (1 + 1e-9)
     mean = df_raw[outlier_cols].mean()

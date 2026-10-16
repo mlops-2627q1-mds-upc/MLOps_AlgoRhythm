@@ -12,9 +12,7 @@ from src.validation.common import finish, run_validation
 
 def expected_one_hot(df: pd.DataFrame, col: str, prefix: str, categories: list) -> pd.DataFrame:
     """One-hot encode `col` with a fixed category list; unseen categories become all zeros."""
-    dummies = pd.get_dummies(
-        pd.Categorical(df[col], categories=categories), prefix=prefix, dtype=int
-    )
+    dummies = pd.get_dummies(pd.Categorical(df[col], categories=categories), prefix=prefix, dtype=int)
     return pd.concat([df.drop(columns=[col]), dummies], axis=1)
 
 
@@ -36,9 +34,11 @@ def check(success: bool, **details) -> dict:
     return {"success": bool(success), "details": details}
 
 
-def check_imputation_statistics(df_in: pd.DataFrame, df_out: pd.DataFrame, numeric_cols: list, rel_tol: float = 0.1) -> dict:
+def check_imputation_statistics(
+    df_in: pd.DataFrame, df_out: pd.DataFrame, numeric_cols: list, rel_tol: float = 0.1
+) -> dict:
     """
-    Valida que la media, mediana y desviación estándar de las columnas numéricas 
+    Valida que la media, mediana y desviación estándar de las columnas numéricas
     no varíen más allá de una tolerancia relativa (rel_tol) tras la imputación.
     """
     bad_cols = []
@@ -47,7 +47,7 @@ def check_imputation_statistics(df_in: pd.DataFrame, df_out: pd.DataFrame, numer
     for col in numeric_cols:
         if col not in df_in.columns or col not in df_out.columns:
             continue
-        
+
         # Estadísticas previas a la imputación (pandas ignora NaN por defecto)
         mean_in = df_in[col].mean()
         median_in = df_in[col].median()
@@ -65,7 +65,7 @@ def check_imputation_statistics(df_in: pd.DataFrame, df_out: pd.DataFrame, numer
 
         # Si alguna métrica supera la tolerancia permitida (ej. 10%)
         is_ok = (mean_diff <= rel_tol) and (median_diff <= rel_tol) and (std_diff <= rel_tol)
-        
+
         if not is_ok:
             bad_cols.append(col)
 
@@ -75,11 +75,7 @@ def check_imputation_statistics(df_in: pd.DataFrame, df_out: pd.DataFrame, numer
             "std_diff_pct": float(std_diff * 100),
         }
 
-    return {
-        "success": len(bad_cols) == 0,
-        "bad_columns": bad_cols,
-        "metrics": metrics_details
-    }
+    return {"success": len(bad_cols) == 0, "bad_columns": bad_cols, "metrics": metrics_details}
 
 
 def validate_split(name, df_in, df_out, expected_oh, n_rows_in, dummy_cols, cat_col, is_train):
@@ -100,17 +96,13 @@ def validate_split(name, df_in, df_out, expected_oh, n_rows_in, dummy_cols, cat_
 
     # Value-level checks solo si las formas coinciden
     if len(df_out) != len(expected_oh) or list(df_out.columns) != list(expected_oh.columns):
-        results[f"{name}_values"] = check(
-            False, reason="shape or columns differ from expected; see GX results"
-        )
+        results[f"{name}_values"] = check(False, reason="shape or columns differ from expected; see GX results")
         return results
 
     # 1. Validación de Imputación por estabilidad estadística (Media, Mediana y DS)
     imputation_check = check_imputation_statistics(df_in, df_out, numeric_cols, rel_tol=0.15)
     results[f"{name}_imputation_stats"] = check(
-        imputation_check["success"], 
-        metrics=imputation_check["metrics"], 
-        bad_columns=imputation_check["bad_columns"]
+        imputation_check["success"], metrics=imputation_check["metrics"], bad_columns=imputation_check["bad_columns"]
     )
 
     # 2. One-hot: values equal the expected encoding, and row sums are consistent[cite: 5]
@@ -151,14 +143,10 @@ def main(interim_dir: str, processed_dir: str, report_path: str) -> None:
 
     results = {}
     results.update(
-        validate_split(
-            "train", train_in, train_out, exp_train_oh, len(train_in), dummy_cols, cat_col, is_train=True
-        )
+        validate_split("train", train_in, train_out, exp_train_oh, len(train_in), dummy_cols, cat_col, is_train=True)
     )
     results.update(
-        validate_split(
-            "test", test_in, test_out, exp_test_oh, len(test_in), dummy_cols, cat_col, is_train=False
-        )
+        validate_split("test", test_in, test_out, exp_test_oh, len(test_in), dummy_cols, cat_col, is_train=False)
     )
     finish(results, report_path)
 
