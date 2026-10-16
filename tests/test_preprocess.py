@@ -96,6 +96,7 @@ def test_drop_columns_not_informative_ignores_absent_columns():
     out = drop_columns_not_informative(df, ["does_not_exist"])
     assert out.equals(df)
 
+
 # remove_outliers
 def test_remove_outliers_drops_extreme_row():
     df = pd.DataFrame({"v": [1.0] * 20 + [100.0]})
