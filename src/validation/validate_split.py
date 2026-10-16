@@ -40,6 +40,8 @@ def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
     train_proportional_success = abs(actual_train_ratio - train_split_target) <= tolerance
     test_proportional_success = abs(actual_test_ratio - test_split_target) <= tolerance
 
+    overlap = set(row_hashes(train)) & set(row_hashes(test))
+
     results = {
         "train_proportion": {
             "success": train_proportional_success,
@@ -59,7 +61,7 @@ def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
                 "actual_rows": n_test,
             },
         },
-        "row_conservation" = {
+        "row_conservation": {
             "success": n_train + n_test == n_total,
             "details": {
                 "n_total": n_total,
@@ -68,8 +70,7 @@ def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
                 "difference": n_total - (n_train + n_test),
             },
         },
-        overlap = set(row_hashes(train)) & set(row_hashes(test))
-        "train_test_overlap" = {
+        "train_test_overlap": {
             "success": len(overlap) == 0,
             "details": {"overlapping_rows": len(overlap)},
         },
