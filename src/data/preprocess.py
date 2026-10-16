@@ -64,7 +64,7 @@ def drop_rows_no_target(df, target: str) -> pd.DataFrame:
     # Never impute the target: rows without target are dropped
     if target and target in df.columns:
         before = len(df)
-        df = df.dropna(subset=[target])
+        df = df.dropna(subset=[target]).reset_index(drop=True)
         logger.info("Rows dropped for missing target: {}", before - len(df))
     return df
 
