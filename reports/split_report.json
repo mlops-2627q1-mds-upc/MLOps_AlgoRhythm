@@ -16,5 +16,20 @@
       "expected_rows": 20376,
       "actual_rows": 20376
     }
+  },
+  "row_conservation": {
+    "success": true,
+    "details": {
+      "n_total": 101879,
+      "n_train": 81503,
+      "n_test": 20376,
+      "difference": 0
+    }
+  },
+  "train_test_overlap": {
+    "success": true,
+    "details": {
+      "overlapping_rows": 0
+    }
   }
 }

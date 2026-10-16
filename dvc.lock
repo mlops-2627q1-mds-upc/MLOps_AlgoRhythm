@@ -2,16 +2,20 @@ schema: '2.0'
 stages:
   preprocess:
     cmd: python src/data/preprocess.py data/raw/dataset.csv 
-      data/interim/dataset_preprocessed.csv
+      data/interim/inter_data.csv data/interim/dataset_preprocessed.csv
     deps:
+    - path: data/interim/inter_data.csv
+      hash: md5
+      md5: c5f0d78d55ac1c4bf5f4f0595a00fef4
+      size: 9027443
     - path: data/raw/dataset.csv
       hash: md5
       md5: e50a70711e823b75c8ebe231468f5faf
       size: 20118244
     - path: src/data/preprocess.py
       hash: md5
-      md5: 0a8852d49045caeb4eaac327fc3e7a9b
-      size: 4930
+      md5: bc385c6a001626d660cda3ce8ce80dc0
+      size: 5089
     params:
       params.yaml:
         global.target: popularity
@@ -40,18 +44,18 @@ stages:
       hash: md5
       md5: f53e0c33fc14d3ac302d0e2996a7fda5
       size: 8608614
-    - path: reports/validation_preprocess.json
+    - path: reports/preprocess_report.json
       hash: md5
-      md5: 2873199e097697ec701964303ecebfff
-      size: 5688
+      md5: a09510413e66b5438676fe069ab8ad95
+      size: 12841
     - path: src/config.py
       hash: md5
       md5: 8014c138b52d6b7bf8809f9c0af04a0a
       size: 889
     - path: src/data/split_data.py
       hash: md5
-      md5: 8144563fe318ab2ec55f4ce3f67397c0
-      size: 1436
+      md5: a9f4f673e0737a0dbef26f980cf98396
+      size: 1433
     params:
       params.yaml:
         global.seed: 0
@@ -77,18 +81,18 @@ stages:
       hash: md5
       md5: 76ac3e8a715848cf16e5c05237ae4cd5
       size: 6886675
-    - path: reports/validation_split.json
+    - path: reports/split_report.json
       hash: md5
-      md5: 1fe7445077c0699fc1d858eefadeb41a
-      size: 3744
+      md5: 215c1766e118720cdef5401a826f4048
+      size: 674
     - path: src/config.py
       hash: md5
       md5: 8014c138b52d6b7bf8809f9c0af04a0a
       size: 889
     - path: src/data/featurize.py
       hash: md5
-      md5: a9aec615eef4cda9891baad45674f5d7
-      size: 5213
+      md5: 65f959e882d8f195013ee8319149d64b
+      size: 5229
     params:
       params.yaml:
         featurize.categorical_col: track_genre
@@ -116,14 +120,14 @@ stages:
       hash: md5
       md5: e405663fc82033ab79ef8eee254a6a2d
       size: 24808039
-    - path: reports/validation_featurize.json
+    - path: reports/featurize_report.json
       hash: md5
-      md5: e8548bbfdd8b104674e6c4a78e79384b
-      size: 324487
+      md5: 0f94a2b10c2639f35a1435a93b3624b7
+      size: 328439
     - path: src/modeling/train.py
       hash: md5
-      md5: 6fc69fa02ef5f3fe70db1745dfeef1f2
-      size: 4742
+      md5: dbd07017bcf9c67699b05a149e25003d
+      size: 4800
     params:
       params.yaml:
         global.seed: 0
@@ -136,25 +140,26 @@ stages:
       md5: 3f3a8d29c50348251625aba4b8db82a9
       size: 569788241
   validate-preprocess:
-    cmd: python src/validation/validate_preprocess.py data/raw/dataset.csv 
-      data/interim/dataset_preprocessed.csv reports/validation_preprocess.json
+    cmd: python src/validation/validate_preprocess.py 
+      data/interim/inter_data.csv data/interim/dataset_preprocessed.csv 
+      reports/preprocess_report.json
     deps:
     - path: data/interim/dataset_preprocessed.csv
       hash: md5
       md5: f53e0c33fc14d3ac302d0e2996a7fda5
       size: 8608614
-    - path: data/raw/dataset.csv
+    - path: data/interim/inter_data.csv
       hash: md5
-      md5: e50a70711e823b75c8ebe231468f5faf
-      size: 20118244
+      md5: c5f0d78d55ac1c4bf5f4f0595a00fef4
+      size: 9027443
     - path: src/validation/common.py
       hash: md5
-      md5: 951e868cb7cece88bd13dfe78e1dba44
-      size: 1338
+      md5: 3a0d666714bec97f24820a469694ae8b
+      size: 1357
     - path: src/validation/validate_preprocess.py
       hash: md5
-      md5: 99590711b587daf9b7d9efbe0cda23ac
-      size: 3271
+      md5: 9d249d8e14a47176d6bd04e0d28571e9
+      size: 2705
     params:
       params.yaml:
         global.target: popularity
@@ -171,14 +176,14 @@ stages:
         - speechiness
         preprocess.z_threshold: 3.0
     outs:
-    - path: reports/validation_preprocess.json
+    - path: reports/preprocess_report.json
       hash: md5
-      md5: 2873199e097697ec701964303ecebfff
-      size: 5688
+      md5: a09510413e66b5438676fe069ab8ad95
+      size: 12841
   validate-split:
     cmd: python src/validation/validate_split.py 
       data/interim/dataset_preprocessed.csv data/interim 
-      reports/validation_split.json
+      reports/split_report.json
     deps:
     - path: data/interim/dataset_preprocessed.csv
       hash: md5
@@ -194,23 +199,23 @@ stages:
       size: 6886675
     - path: src/validation/common.py
       hash: md5
-      md5: 951e868cb7cece88bd13dfe78e1dba44
-      size: 1338
+      md5: 3a0d666714bec97f24820a469694ae8b
+      size: 1357
     - path: src/validation/validate_split.py
       hash: md5
-      md5: 4d5c28ab4380ac21a0a1db7d88a65e52
-      size: 1936
+      md5: c402a5cd0d089560cb9225a6e5c15ae3
+      size: 2778
     params:
       params.yaml:
         split-data.test_split: 0.2
     outs:
-    - path: reports/validation_split.json
+    - path: reports/split_report.json
       hash: md5
-      md5: 1fe7445077c0699fc1d858eefadeb41a
-      size: 3744
+      md5: 215c1766e118720cdef5401a826f4048
+      size: 674
   validate-featurize:
     cmd: python src/validation/validate_featurize.py data/interim data/processed
-      reports/validation_featurize.json
+      reports/featurize_report.json
     deps:
     - path: data/interim/test.csv
       hash: md5
@@ -230,12 +235,12 @@ stages:
       size: 24808039
     - path: src/validation/common.py
       hash: md5
-      md5: 951e868cb7cece88bd13dfe78e1dba44
-      size: 1338
+      md5: 3a0d666714bec97f24820a469694ae8b
+      size: 1357
     - path: src/validation/validate_featurize.py
       hash: md5
-      md5: 42f3d0ae725fd20caa52a0f27d8945e6
-      size: 6107
+      md5: dca33adaea78183da20f68ca51df2f69
+      size: 6610
     params:
       params.yaml:
         featurize.categorical_col: track_genre
@@ -244,7 +249,7 @@ stages:
         featurize.skew_threshold: 1.0
         global.target: popularity
     outs:
-    - path: reports/validation_featurize.json
+    - path: reports/featurize_report.json
       hash: md5
-      md5: e8548bbfdd8b104674e6c4a78e79384b
-      size: 324487
+      md5: 0f94a2b10c2639f35a1435a93b3624b7
+      size: 328439
