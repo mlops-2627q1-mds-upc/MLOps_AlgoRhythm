@@ -29,7 +29,7 @@ This model is part of an MLOps pipeline designed to predict the Spotify populari
 - **Model type:** Supervised Regression 
 - **Language(s):** English
 - **License:** MIT
-- **Repository / Tracking:** Integrated with DagsHub, DVC, and MLflow for experiment tracking and versioning.
+- **Repository / Tracking:** Integrated with DagsHub, DVC, and MLflow for dataset versioning and experiment tracking.
 
 ## Uses
 
@@ -82,14 +82,14 @@ print(f"Predicted Spotify Popularity Score: {predicted_score[0]:.2f}")
 
 ### Training Data
 - **Dataset:** Spotify Tracks Dataset.
-- **Target Variable:** `popularity` (Integer / Float score from 0 to 100 representing play count and recency).
-- **Features Used:**
-  - **Audio Features:** `danceability`, `energy`, `key`, `loudness`, `mode`, `speechiness`, `acousticness`, `instrumentalness`, `liveness`, `valence`, `tempo`, `duration_ms`, `time_signature`.
-  - **Metadata:** `explicit`, `track_genre`.
-- **Omitted Features:** `artists`, `album_name`, `track_name` 
+- **Target Variable:** `popularity` (Integer score from 0 to 100 representing play count and recency).
+- **Input Dimension:** 128 total features:
+  * **14 Base Features:** `duration_ms`, `explicit`, `danceability`, `energy`, `key`, `loudness`, `mode`, `speechiness`, `acousticness`, `instrumentalness`, `liveness`, `valence`, `tempo`, and `time_signature`
+  * **114 Categorical Dummy Features:** One-hot encoded columns derived from `track_genre`
+* **Omitted Features:** `artists`, `album_name`, and `track_name`
 
-### Training Procedure
-- **Preprocessing:** Handling missing values and outliers, encoding categorical metadata (`track_genre`, `explicit`), and scaling numeric audio features.
+#### Training Procedure
+- **Preprocessing:** Handling missing values and outliers, one-hot encoding for the categorical genre variable, and scaling numeric audio features.
 - **Pipeline:** Automated with DVC (`dvc.yaml`) for data cleaning, feature engineering, and training execution.
 - **Experiment Tracking:** Hyperparameters, parameters, and metrics are logged automatically to MLflow / DagsHub.
 
@@ -97,10 +97,10 @@ print(f"Predicted Spotify Popularity Score: {predicted_score[0]:.2f}")
 
 ## Evaluation
 
-### Testing Data & Metrics
-- **MAE (Mean Absolute Error):** Interpretable metric showing the average popularity point deviation.
-- **RMSE (Root Mean Squared Error):** Penalizes larger prediction errors.
-- **R² Score:** Measures the proportion of variance explained by the model.
+#### Evaluation Metrics
+* **MAE (Mean Absolute Error):** Measures the average absolute prediction error in popularity points.
+* **RMSE (Root Mean Squared Error):** Penalizes larger prediction errors more heavily.
+* **$R^2$ Score:** Quantifies the proportion of target variance explained by the model features.
 
 ### Model Results *(To be updated)*
 
