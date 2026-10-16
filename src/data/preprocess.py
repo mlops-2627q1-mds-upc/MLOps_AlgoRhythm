@@ -64,7 +64,7 @@ def drop_rows_no_target(df, target: str) -> pd.DataFrame:
     # Never impute the target: rows without target are dropped
     if target and target in df.columns:
         before = len(df)
-        df = df.dropna(subset=[target])
+        df = df.dropna(subset=[target]).reset_index(drop=True)
         logger.info("Rows dropped for missing target: {}", before - len(df))
     return df
 
@@ -107,12 +107,13 @@ def remove_outliers(df, cols: list[str], z_threshold: float) -> pd.DataFrame:
 
 def main():
     # Validate arguments
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         logger.error("Arguments error. Usage: \tpython preprocess.py <input_path> <output_path>\n")
         sys.exit(1)
 
     input_path = sys.argv[1]
-    output_path = sys.argv[2]
+    inter_path = sys.argv[2]
+    output_path = sys.argv[3]
 
     # Load parameters
     with open("params.yaml", encoding="utf-8") as f:
@@ -125,9 +126,7 @@ def main():
 
     # Load dataset
     df = pd.read_csv(input_path)
-    logger.info(
-        "Loaded dataset from {}: {} rows x {} columns", input_path, f"{df.shape[0]:,}", df.shape[1]
-    )
+    logger.info("Loaded dataset from {}: {} rows x {} columns", input_path, f"{df.shape[0]:,}", df.shape[1])
 
     # Apply transformations
     df = change_type(df)
@@ -136,6 +135,11 @@ def main():
     df = drop_rows_no_target(df, target)
     df = drop_columns_not_informative(df, cols_to_drop)
     df = drop_duplicates(df)
+
+    # Save dataset for outlier validation
+    df.to_csv(inter_path, index=False)
+    logger.info("Intermediate dataset saved to {}", inter_path)
+
     df = remove_outliers(df, outlier_cols, z_threshold)
 
     # Save dataset

@@ -1,9 +1,10 @@
 stages:
   preprocess:
     cmd: python src/data/preprocess.py data/raw/dataset.csv 
-      data/interim/dataset_preprocessed.csv
+      data/interim/inter_data.csv data/interim/dataset_preprocessed.csv
     deps:
     - data/raw/dataset.csv
+    - data/interim/inter_data.csv
     - src/data/preprocess.py
     params:
     - preprocess.cols_to_drop
@@ -14,10 +15,10 @@ stages:
     outs:
     - data/interim/dataset_preprocessed.csv
   validate-preprocess:
-    cmd: python src/validation/validate_preprocess.py data/raw/dataset.csv
-      data/interim/dataset_preprocessed.csv reports/validation_preprocess.json
+    cmd: python src/validation/validate_preprocess.py data/interim/inter_data.csv
+      data/interim/dataset_preprocessed.csv reports/preprocess_report.json
     deps:
-    - data/raw/dataset.csv
+    - data/interim/inter_data.csv
     - data/interim/dataset_preprocessed.csv
     - src/validation/validate_preprocess.py
     - src/validation/common.py
@@ -28,7 +29,7 @@ stages:
     - preprocess.outlier_cols
     - preprocess.z_threshold
     outs:
-    - reports/validation_preprocess.json:
+    - reports/preprocess_report.json:
         cache: false
   split-data:
     cmd: python src/data/split_data.py data/interim/dataset_preprocessed.csv 
@@ -36,7 +37,7 @@ stages:
     deps:
     - data/interim/dataset_preprocessed.csv
     - src/data/split_data.py
-    - reports/validation_preprocess.json
+    - reports/preprocess_report.json
     - src/config.py
     params:
     - global.seed
@@ -47,7 +48,7 @@ stages:
     - data/interim/train.csv
   validate-split:
     cmd: python src/validation/validate_split.py data/interim/dataset_preprocessed.csv
-      data/interim reports/validation_split.json
+      data/interim reports/split_report.json
     deps:
     - data/interim/dataset_preprocessed.csv
     - data/interim/train.csv
@@ -57,7 +58,7 @@ stages:
     params:
     - split-data.test_split
     outs:
-    - reports/validation_split.json:
+    - reports/split_report.json:
         cache: false
   featurize:
     cmd: python src/data/featurize.py data/interim data/processed
@@ -65,7 +66,7 @@ stages:
     - data/interim/test.csv
     - data/interim/train.csv
     - src/data/featurize.py
-    - reports/validation_split.json
+    - reports/split_report.json
     - src/config.py
     params:
     - featurize.categorical_col
@@ -78,7 +79,7 @@ stages:
     - data/processed/train.csv
   validate-featurize:
     cmd: python src/validation/validate_featurize.py data/interim data/processed
-      reports/validation_featurize.json
+      reports/featurize_report.json
     deps:
     - data/interim/train.csv
     - data/interim/test.csv
@@ -93,14 +94,14 @@ stages:
     - featurize.one_hot_prefix
     - featurize.skew_threshold
     outs:
-    - reports/validation_featurize.json:
+    - reports/featurize_report.json:
         cache: false
   train:
     cmd: python src/modeling/train.py
     deps:
     - data/processed/test.csv
     - data/processed/train.csv
-    - reports/validation_featurize.json
+    - reports/featurize_report.json
     - src/modeling/train.py
     params:
     - global.seed

@@ -1,65 +1,82 @@
+# pylint: disable=too-many-locals
+
 import sys
 
-import great_expectations.expectations as gxe
 import pandas as pd
 import yaml
 
-from src.validation.common import finish, run_validation
+from src.validation.common import finish
 
-
-def check_no_overlap(train: pd.DataFrame, test: pd.DataFrame) -> dict:
-    """Check that no row appears in both train and test (data leakage)."""
-    shared_cols = [c for c in train.columns if c in test.columns]
-    n_overlap = len(
-        train[shared_cols]
-        .drop_duplicates()
-        .merge(test[shared_cols].drop_duplicates(), how="inner", on=shared_cols)
-    )
-    return {
-        "success": n_overlap == 0,
-        "details": {"overlapping_rows": n_overlap},
-    }
+def row_hashes(df: pd.DataFrame) -> pd.Series:
+    """One hash per row, ignoring the index, so rows can be compared across DataFrames."""
+    return pd.util.hash_pandas_object(df, index=False)
 
 
 def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
+    # 1. Cargar parámetros desde params.yaml
     with open("params.yaml", encoding="utf-8") as f:
         params = yaml.safe_load(f)
-    test_split = params["split-data"]["test_split"]
 
+    train_split_target = params["split-data"]["train_split"]
+    test_split_target = params["split-data"]["test_split"]
+
+    # 2. Cargar datasets
     full = pd.read_csv(preprocessed_path)
     train = pd.read_csv(f"{split_dir}/train.csv")
     test = pd.read_csv(f"{split_dir}/test.csv")
 
-    n = len(full)
-    expected_test = round(n * test_split)
-    tol = max(1, int(0.01 * n))  # 1% tolerance for rounding/stratification
+    n_total = len(full)
+    n_train = len(train)
+    n_test = len(test)
 
-    def size_check(expected):
-        return gxe.ExpectTableRowCountToBeBetween(
-            min_value=expected - tol, max_value=expected + tol
-        )
+    # 3. Calcular proporciones reales
+    actual_train_ratio = n_train / n_total if n_total > 0 else 0
+    actual_test_ratio = n_test / n_total if n_total > 0 else 0
+
+    # 4. Definir una tolerancia estricta (ej. 1% de variación permitida por redondeos)
+    tolerance = 0.01
+
+    # 5. Validaciones personalizadas para los tamaños/proporciones
+    train_proportional_success = abs(actual_train_ratio - train_split_target) <= tolerance
+    test_proportional_success = abs(actual_test_ratio - test_split_target) <= tolerance
+
+    overlap = set(row_hashes(train)) & set(row_hashes(test))
 
     results = {
-        "train": run_validation(
-            train,
-            "train",
-            [
-                size_check(n - expected_test),
-                gxe.ExpectTableColumnsToMatchSet(column_set=list(full.columns), exact_match=True),
-            ],
-        ),
-        "test": run_validation(
-            test,
-            "test",
-            [
-                size_check(expected_test),
-                gxe.ExpectTableColumnsToMatchSet(column_set=list(full.columns), exact_match=True),
-            ],
-        ),
+        "train_proportion": {
+            "success": train_proportional_success,
+            "details": {
+                "expected_ratio": train_split_target,
+                "actual_ratio": actual_train_ratio,
+                "expected_rows": round(n_total * train_split_target),
+                "actual_rows": n_train,
+            },
+        },
+        "test_proportion": {
+            "success": test_proportional_success,
+            "details": {
+                "expected_ratio": test_split_target,
+                "actual_ratio": actual_test_ratio,
+                "expected_rows": round(n_total * test_split_target),
+                "actual_rows": n_test,
+            },
+        },
+        "row_conservation": {
+            "success": n_train + n_test == n_total,
+            "details": {
+                "n_total": n_total,
+                "n_train": n_train,
+                "n_test": n_test,
+                "difference": n_total - (n_train + n_test),
+            },
+        },
+        "train_test_overlap": {
+            "success": len(overlap) == 0,
+            "details": {"overlapping_rows": len(overlap)},
+        },
     }
 
-    results["no_overlap"] = check_no_overlap(train, test)
-
+    # 6. Finalizar y generar reporte
     finish(results, report_path)
 
 

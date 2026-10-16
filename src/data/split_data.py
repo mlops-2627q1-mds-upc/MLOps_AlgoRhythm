@@ -11,13 +11,11 @@ from src.config import TEST_FILE, TRAIN_FILE
 
 def main():
     """
-    Splits preprocesed data into train, validation and test sets and save them to the 'data/interim' directory.
+    Splits preprocesed data into train and test sets and save them to the 'data/interim' directory.
     """
     # Validate arguments
     if len(sys.argv) != 3:
-        logger.error(
-            "Arguments error. Usage: \tpython split_data.py <input_path> <output_folder_path>\n"
-        )
+        logger.error("Arguments error. Usage: \tpython split_data.py <input_path> <output_folder_path>\n")
         sys.exit(1)
 
     input_path = Path(sys.argv[1])

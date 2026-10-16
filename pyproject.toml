@@ -20,9 +20,11 @@ dependencies = [
     "codecarbon>=3.3.1",
     "dagshub>=0.7.2",
     "dvc>=3.67.1",
+    "great-expectations>=1.24.0",
     "loguru>=0.7.3",
     "mlflow>=3.17.0",
     "pandas>=3.0.6",
+    "pytest>=9.1.1",
     "scikit-learn>=1.9.1",
 ]
 
@@ -42,6 +44,8 @@ force-sort-within-sections = true
 [tool.pylint.main]
 source-roots = ["src"]
 recursive = true
+ignore = [".venv", ".dvc", "node_modules"]
+ignore-paths = ["^\\.venv/.*", "^\\.dvc/.*"]
 
 [tool.pylint.messages_control]
 disable = [

@@ -329,6 +329,22 @@
           "success": true,
           "kwargs": {
             "batch_id": "pandas-train_processed",
+            "column": "explicit"
+          },
+          "result": {
+            "element_count": 81503,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-train_processed",
             "column": "danceability"
           },
           "result": {
@@ -361,7 +377,39 @@
           "success": true,
           "kwargs": {
             "batch_id": "pandas-train_processed",
+            "column": "key"
+          },
+          "result": {
+            "element_count": 81503,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-train_processed",
             "column": "loudness"
+          },
+          "result": {
+            "element_count": 81503,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-train_processed",
+            "column": "mode"
           },
           "result": {
             "element_count": 81503,
@@ -458,54 +506,6 @@
           "kwargs": {
             "batch_id": "pandas-train_processed",
             "column": "tempo"
-          },
-          "result": {
-            "element_count": 81503,
-            "unexpected_count": 0,
-            "unexpected_percent": 0.0,
-            "partial_unexpected_list": [],
-            "partial_unexpected_counts": [],
-            "partial_unexpected_index_list": []
-          }
-        },
-        {
-          "expectation_type": "expect_column_values_to_not_be_null",
-          "success": true,
-          "kwargs": {
-            "batch_id": "pandas-train_processed",
-            "column": "explicit"
-          },
-          "result": {
-            "element_count": 81503,
-            "unexpected_count": 0,
-            "unexpected_percent": 0.0,
-            "partial_unexpected_list": [],
-            "partial_unexpected_counts": [],
-            "partial_unexpected_index_list": []
-          }
-        },
-        {
-          "expectation_type": "expect_column_values_to_not_be_null",
-          "success": true,
-          "kwargs": {
-            "batch_id": "pandas-train_processed",
-            "column": "key"
-          },
-          "result": {
-            "element_count": 81503,
-            "unexpected_count": 0,
-            "unexpected_percent": 0.0,
-            "partial_unexpected_list": [],
-            "partial_unexpected_counts": [],
-            "partial_unexpected_index_list": []
-          }
-        },
-        {
-          "expectation_type": "expect_column_values_to_not_be_null",
-          "success": true,
-          "kwargs": {
-            "batch_id": "pandas-train_processed",
-            "column": "mode"
           },
           "result": {
             "element_count": 81503,
@@ -5096,10 +5096,87 @@
       "result_url": null
     }
   },
-  "train_imputation": {
+  "train_imputation_stats": {
     "success": true,
     "details": {
-      "mismatched_columns": []
+      "metrics": {
+        "popularity": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "duration_ms": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "explicit": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "danceability": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "energy": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "key": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "loudness": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "mode": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "speechiness": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "acousticness": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "instrumentalness": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "liveness": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "valence": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "tempo": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "time_signature": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        }
+      },
+      "bad_columns": []
     }
   },
   "train_one_hot": {
@@ -5443,6 +5520,22 @@
           "success": true,
           "kwargs": {
             "batch_id": "pandas-test_processed",
+            "column": "explicit"
+          },
+          "result": {
+            "element_count": 20376,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-test_processed",
             "column": "danceability"
           },
           "result": {
@@ -5475,7 +5568,39 @@
           "success": true,
           "kwargs": {
             "batch_id": "pandas-test_processed",
+            "column": "key"
+          },
+          "result": {
+            "element_count": 20376,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-test_processed",
             "column": "loudness"
+          },
+          "result": {
+            "element_count": 20376,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-test_processed",
+            "column": "mode"
           },
           "result": {
             "element_count": 20376,
@@ -5572,54 +5697,6 @@
           "kwargs": {
             "batch_id": "pandas-test_processed",
             "column": "tempo"
-          },
-          "result": {
-            "element_count": 20376,
-            "unexpected_count": 0,
-            "unexpected_percent": 0.0,
-            "partial_unexpected_list": [],
-            "partial_unexpected_counts": [],
-            "partial_unexpected_index_list": []
-          }
-        },
-        {
-          "expectation_type": "expect_column_values_to_not_be_null",
-          "success": true,
-          "kwargs": {
-            "batch_id": "pandas-test_processed",
-            "column": "explicit"
-          },
-          "result": {
-            "element_count": 20376,
-            "unexpected_count": 0,
-            "unexpected_percent": 0.0,
-            "partial_unexpected_list": [],
-            "partial_unexpected_counts": [],
-            "partial_unexpected_index_list": []
-          }
-        },
-        {
-          "expectation_type": "expect_column_values_to_not_be_null",
-          "success": true,
-          "kwargs": {
-            "batch_id": "pandas-test_processed",
-            "column": "key"
-          },
-          "result": {
-            "element_count": 20376,
-            "unexpected_count": 0,
-            "unexpected_percent": 0.0,
-            "partial_unexpected_list": [],
-            "partial_unexpected_counts": [],
-            "partial_unexpected_index_list": []
-          }
-        },
-        {
-          "expectation_type": "expect_column_values_to_not_be_null",
-          "success": true,
-          "kwargs": {
-            "batch_id": "pandas-test_processed",
-            "column": "mode"
           },
           "result": {
             "element_count": 20376,
@@ -10210,10 +10287,87 @@
       "result_url": null
     }
   },
-  "test_imputation": {
+  "test_imputation_stats": {
     "success": true,
     "details": {
-      "mismatched_columns": []
+      "metrics": {
+        "popularity": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "duration_ms": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "explicit": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "danceability": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "energy": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "key": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "loudness": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "mode": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "speechiness": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "acousticness": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "instrumentalness": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "liveness": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "valence": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "tempo": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        },
+        "time_signature": {
+          "mean_diff_pct": 0.0,
+          "median_diff_pct": 0.0,
+          "std_diff_pct": 0.0
+        }
+      },
+      "bad_columns": []
     }
   },
   "test_one_hot": {

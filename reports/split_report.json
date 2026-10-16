@@ -1,0 +1,20 @@
+{
+  "train_proportion": {
+    "success": true,
+    "details": {
+      "expected_ratio": 0.8,
+      "actual_ratio": 0.7999980368868952,
+      "expected_rows": 81503,
+      "actual_rows": 81503
+    }
+  },
+  "test_proportion": {
+    "success": true,
+    "details": {
+      "expected_ratio": 0.2,
+      "actual_ratio": 0.20000196311310475,
+      "expected_rows": 20376,
+      "actual_rows": 20376
+    }
+  }
+}
