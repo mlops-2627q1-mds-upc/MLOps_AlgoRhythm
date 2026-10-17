@@ -4,24 +4,17 @@
     <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
 </a>
 
-# Natural Language and Multimodal Music Recommendation System
+# MLOps_AlgoRhythm
 
-An end-to-end Machine Learning project for personalized music recommendation using natural language queries and vector similarity matching.
+A reproducible Machine Learning project for predicting the popularity score of Spotify tracks using audio features and selected track metadata.
 
-## Project Overview
+## Project overview
 
-Finding tracks that match a specific mood, activity, or atmosphere often fails with traditional keyword search. This project leverages pre-trained Sentence Transformer models and visual embedding extractors to translate natural language prompts (e.g., *"upbeat music for a rainy evening"*) into tailored track recommendations.
+This project studies whether audio features and track metadata can predict a Spotify popularity score from 0 to 100. We train a regression model using features such as danceability, energy, loudness, tempo, and genre.
 
-We process free-text queries into a unified vector space, perform high-speed cosine similarity search against pre-computed Spotify track embeddings, and combine audio features (danceability, energy, valence) to return ranked top-10 track recommendations via API.
+The model does not use artist names, album names, or track names as input features. This lets us study predictions based on track characteristics without directly including artist identity. It does not remove every possible bias from the data or from Spotify’s popularity measure.
 
-## Dataset
-
-We use the **Spotify Dataset** sourced from Kaggle and enriched via the official **Spotify Developer Web API**.
-
-* **Granularity:** Track-level metadata and audio attributes
-* **Scope:** Multi-genre global music catalog
-* **Volume:** $\approx 73,000+$ track observations
-* **Source:** Spotify Developer API / Kaggle Music Datasets
+The project focuses on a reproducible Machine Learning workflow. It uses DVC to version data and model artifacts, MLflow to track experiments, Great Expectations to validate pipeline data, Pytest to test code and model behaviour, and CodeCarbon to estimate training energy use and emissions.
 
 ## Team Members
 
@@ -33,57 +26,7 @@ We use the **Spotify Dataset** sourced from Kaggle and enriched via the official
 | **Marta** | Sunyer Giménez | [@MartaSunyer](https://www.google.com/search?q=https://github.com/MartaSunyer&utm_source=gemini) | `marta.sunyer@estudiantat.upc.edu` |
 | **Sergi** | González Martos | [@sergiGM0](https://www.google.com/search?q=https://github.com/sergiGM0&utm_source=gemini) | `sergi.gonzalez.martos@estudiantat.upc.edu` |
 
-## Project Organization
-
-```
-├── LICENSE            <- Open-source license if one is chosen
-├── Makefile           <- Makefile with convenience commands like `make data` or `make train`
-├── README.md          <- The top-level README for developers using this project.
-├── data
-│   ├── external       <- Data from third party sources.
-│   ├── interim        <- Intermediate data that has been transformed.
-│   ├── processed      <- The final, canonical data sets for modeling.
-│   └── raw            <- The original, immutable data dump.
-│
-├── docs               <- A default mkdocs project; see www.mkdocs.org for details
-│
-├── models             <- Trained and serialized models, model predictions, or model summaries
-│
-├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-│                         the creator's initials, and a short `-` delimited description, e.g.
-│                         `1.0-jqp-initial-data-exploration`.
-│
-├── pyproject.toml     <- Project configuration file with package metadata for 
-│                         src and configuration for tools like black
-│
-├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-│
-├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-│   └── figures        <- Generated graphics and figures to be used in reporting
-│
-├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-│                         generated with `pip freeze > requirements.txt`
-│
-├── setup.cfg          <- Configuration file for flake8
-│
-└── src   <- Source code for use in this project.
-│   │
-│   ├── __init__.py             <- Makes src a Python module
-│   │
-│   ├── config.py               <- Store useful variables and configuration
-│   │
-│   ├── dataset.py              <- Scripts to download or generate data
-│   │
-│   ├── features.py             <- Code to create features for modeling
-│   │
-│   ├── modeling                
-│   │   ├── __init__.py 
-│   │   ├── predict.py          <- Code to run model inference with trained models          
-│   │   └── train.py            <- Code to train models
-│   │
-│   └── plots.py                <- Code to create visualizations
-│
-└── tests              <- Test code and test data for pytest
-```
+## Limitations
+The model predicts Spotify’s popularity score, not general music quality or an artist’s success. Popularity reflects Spotify’s data at the time of collection and may change over time. The model also excludes artist identity, and its performance may change as music trends and Spotify’s user behaviour change.
 
 --------
