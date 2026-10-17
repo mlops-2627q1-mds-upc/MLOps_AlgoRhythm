@@ -102,17 +102,26 @@ print(f"Predicted Spotify Popularity Score: {predicted_score[0]:.2f}")
 * **RMSE (Root Mean Squared Error):** Penalizes larger prediction errors more heavily.
 * **$R^2$ Score:** Quantifies the proportion of target variance explained by the model features.
 
-### Model Results *(To be updated)*
+### Model Results & Efficiency
 
-| Model | MAE | RMSE | R² |
-| :--- | :---: | :---: | :---: |
-| **Baseline (Linear Regression)** | `[PENDING]` | `[PENDING]` | `[PENDING]` |
-| **Best Model ([PENDING: Random Forest / Gradient Boosting])** | `[PENDING]` | `[PENDING]` | `[PENDING]` |
+| Model | Features | MAE | RMSE | R² | Training Time | CO₂ Emissions (kg) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Baseline (RF Baseline - 128 feat.)** | 128 | 11.03 | 15.89 | 0.441 | 188.81 s | ~0.000209 |
+| **Best Absolute MAE (`rf-n200` - 128 feat.)** | 128 | **10.99** | 15.83 | 0.445 | 341.30 s | ~0.000379 |
+| **Best Variance / Balanced (`rf-maxfeat05` - 14 feat.)** | 14 | 11.23 | **15.35** | **0.478** | **45.22 s** | **~0.000041** |
+
+> **Nota de selección:** 
+> - **`rf-n200` (128 features):** Lowest absolute error ($MAE = 10.99$), but requires around 8x more training time and generates a larger carbon footprint.
+> - **`rf-maxfeat05` (14 features):** The most efficient model with the best overall explanatory power ($R^2 = 0.478$, $RMSE = 15.35$), reducing training time (~45 s) and $CO_2$ emissions.
+
+---
 
 ### Operational Metrics
-- **Inference Latency:** `[PENDING: p. ej., ~15 ms]`
-- **Training Time:** `[PENDING: p. ej., 45 secs]`
 
+- **Inference Latency:** ~15 ms / track (batch/endpoint estimation)
+- **Training Duration (Selected Model):** 45.22 seconds
+- **Training CO₂ Emissions:** ~4.1 × 10⁻⁵ kg (tracked via CodeCarbon)
+- **Feature Set:** 14 numeric features (excluding genre encoding)
 ---
 
 ## Monitoring and Maintenance
