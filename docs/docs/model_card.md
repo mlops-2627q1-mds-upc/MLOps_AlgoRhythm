@@ -47,6 +47,7 @@ This model is part of an MLOps pipeline designed to predict the Spotify populari
 - **Exclusion of Artist Metadata:** By omitting artist and historical popularity, the model may underestimate songs whose success is heavily based by artist fame.
 - **Historical Bias:** Popularity scores reflect Spotify's algorithmic preferences and habits of listeners ONLY at the time of data collection.
 - **Data Drift:** Changes in musical trends over time can affect model performance. The system includes data drift monitoring to flag models for further investigation or retraining (to be implemented).
+- Since outliers were removed predictions for songs with extreme values are less reliable.
 
 ## How to Get Started with the Model
 
@@ -108,10 +109,20 @@ model = mlflow.sklearn.load_model("models:/spotify_popularity_rf/latest")
   * **114 Categorical Dummy Features:** One-hot encoded columns derived from `track_genre`
 * **Omitted Features:** `artists`, `album_name`, and `track_name`
 
-#### Training Procedure
-- **Preprocessing:** Handling missing values and outliers, one-hot encoding for the categorical genre variable, and scaling numeric audio features.
-- **Pipeline:** Automated with DVC (`dvc.yaml`) for data cleaning, feature engineering, and training execution.
-- **Experiment Tracking:** Hyperparameters, parameters, and metrics are logged automatically to MLflow / DagsHub.
+### Training Procedure
+
+* **Model:** `RandomForestRegressor` (scikit-learn); hyperparameters are defined in `params.yaml`.
+* **Preprocessing** (`preprocessing_pipeline.py`):
+   * Fully duplicated rows are removed.
+   * Columns with more than 50% missing values are dropped, and rows with a missing target are dropped (the target is never imputed).
+   * Rows that are Z-score outliers (|z| > 3.0) in at least one of `duration_ms`, `loudness` or `speechiness` are removed.
+   * Non-feature columns are dropped: `Unnamed: 0`, `track_id`, `artists`, `album_name`, `track_name`.
+   * Remaining missing values are imputed: numeric features with the median or mean and categorical features with the mode.
+   * `track_genre` is one-hot encoded with the prefix `genre_` (114 genres).
+   * No scaling is applied (Random Forests are insensitive to feature scaling).
+   * *Scaling:* none (Random Forests are insensitive to feature scaling).
+* **Pipeline:** automated with DVC (`dvc.yaml`) for data cleaning, feature engineering, and training execution.
+* **Experiment tracking:** hyperparameters, parameters, metrics, and carbon emissions are logged automatically to MLflow / DagsHub.
 
 ---
 
