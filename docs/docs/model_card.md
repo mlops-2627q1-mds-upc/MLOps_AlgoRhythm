@@ -46,37 +46,57 @@ This model is part of an MLOps pipeline designed to predict the Spotify populari
 
 - **Exclusion of Artist Metadata:** By omitting artist and historical popularity, the model may underestimate songs whose success is heavily based by artist fame.
 - **Historical Bias:** Popularity scores reflect Spotify's algorithmic preferences and habits of listeners ONLY at the time of data collection.
-- **Data Drift:** Changes in musical trends over time can affect model performance. The system includes data drift monitoring to flag models for further investigation or retraining.
+- **Data Drift:** Changes in musical trends over time can affect model performance. The system includes data drift monitoring to flag models for further investigation or retraining (to be implemented).
 
 ## How to Get Started with the Model
+
+
+### Requirements
+Use the same library versions the model was trained with (see `requirements.txt`).
+
+### Option 1: Load the model from the repository
+The model file is tracked with DVC:
+```bash
+dvc pull   # downloads models/random_forest.pkl
+```
 
 ```python
 import joblib
 import pandas as pd
 
-# Load trained model artifact
-model = joblib.load("model.pkl")
+model = joblib.load("models/random_forest.pkl")
 
-# Example audio features and track metadata
-sample_track = pd.DataFrame([{
-    'danceability': 0.75,
-    'energy': 0.80,
-    'loudness': -5.5,
-    'speechiness': 0.05,
-    'acousticness': 0.12,
-    'instrumentalness': 0.00,
-    'liveness': 0.10,
-    'valence': 0.65,
-    'tempo': 120.0,
-    'duration_ms': 210000,
-    'explicit': 0,
-    'track_genre': 'pop'
-}])
+# The model expects exactly 128 features, in this order:
+features = list(model.feature_names_in_)
 
-# Predict popularity score
-predicted_score = model.predict(sample_track)
-print(f"Predicted Spotify Popularity Score: {predicted_score[0]:.2f}")
-````
+# Build one song: start from all zeros (every genre off) and fill in the values
+song = pd.DataFrame([dict.fromkeys(features, 0.0)])
+song.loc[0, ["duration_ms", "explicit", "danceability", "energy", "key",
+             "loudness", "mode", "speechiness", "acousticness",
+             "instrumentalness", "liveness", "valence", "tempo",
+             "time_signature"]] = [210000, 0, 0.7, 0.8, 5, -5.5, 1,
+                                   0.05, 0.1, 0.0, 0.12, 0.6, 120.0, 4]
+song.loc[0, "genre_pop"] = 1  # set exactly one genre column to 1
+
+popularity = model.predict(song)[0]
+print(f"Predicted popularity: {popularity:.1f} (scale 0-100)")
+```
+
+### Option 2: Load the registered model from MLflow (DagsHub)
+```python
+import dagshub, mlflow.sklearn
+
+dagshub.init(repo_owner="sergi.gonzalez.martos", repo_name="MLOps_AlgoRhythm", mlflow=True)
+model = mlflow.sklearn.load_model("models:/spotify_popularity_rf/latest")
+```
+
+### Input format
+- One row per song, with the 128 columns listed in `model.feature_names_in_`.
+- Audio features use Spotify's original scales (e.g. `danceability` in 0-1, `loudness` in dB).
+- Genre is one-hot encoded: set exactly one `genre_*` column to 1 and the rest to 0.
+- Output: a predicted popularity score between 0 and 100.
+
+
 
 ## Training Details
 
@@ -125,4 +145,4 @@ print(f"Predicted Spotify Popularity Score: {predicted_score[0]:.2f}")
 ---
 
 ## Monitoring and Maintenance
-- **Data Drift Detection:** Simulated using split dataset evaluation. Features exceeding defined drift thresholds trigger an automated flag for investigation or retraining.
+- **Data Drift Detection:** Simulated using split dataset evaluation. Features exceeding defined drift thresholds trigger an automated flag for investigation or retraining (to be implemented).
