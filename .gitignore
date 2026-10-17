@@ -193,3 +193,6 @@ cython_debug/
 # Ignorar modelos binarios pesados
 models/*.pkl
 models/random_forest.pkl
+
+# Ignore mlflow
+mlflow.db
