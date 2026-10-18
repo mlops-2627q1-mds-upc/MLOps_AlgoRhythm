@@ -10,7 +10,6 @@ from src.data.featurize import (
 )
 
 
-# classify_variables
 def test_classify_variables_splits_numeric_and_categorical():
     df = pd.DataFrame(
         {
@@ -76,7 +75,6 @@ def test_fit_imputer_skips_columns_entirely_missing_in_train():
     assert "a" in fill
 
 
-# apply_imputer
 def test_apply_imputer_uses_train_values_not_test_statistics():
     test = pd.DataFrame({"a": [100.0, np.nan], "genre": [None, "y"]})
     out = apply_imputer(test, {"a": 2.0, "genre": "x"}, "test")
@@ -97,7 +95,6 @@ def test_apply_imputer_leaves_nans_in_columns_without_fill_value():
     assert out["a"].tolist() == [9.0, 1.0]
 
 
-# one_hot_encode
 def test_one_hot_encode_creates_prefixed_int_columns_at_the_end():
     df = pd.DataFrame({"genre": ["a", "b", "a"], "v": [1, 2, 3]})
     out = one_hot_encode(df, "genre", "g", ["a", "b"], "train")
