@@ -16,6 +16,17 @@ classifiers = [
     "License :: OSI Approved :: MIT License"
 ]
 requires-python = "~=3.11.0"
+dependencies = [
+    "codecarbon>=3.3.1",
+    "dagshub>=0.7.2",
+    "dvc>=3.67.1",
+    "great-expectations>=1.24.0",
+    "loguru>=0.7.3",
+    "mlflow>=3.17.0",
+    "pandas>=3.0.6",
+    "pytest>=9.1.1",
+    "scikit-learn>=1.9.1",
+]
 
 
 [tool.ruff]
@@ -30,3 +41,30 @@ extend-select = ["I"]  # Add import sorting
 known-first-party = ["src"]
 force-sort-within-sections = true
 
+[tool.pylint.main]
+source-roots = ["src"]
+recursive = true
+ignore = [".venv", ".dvc", "node_modules"]
+ignore-paths = ["^\\.venv/.*", "^\\.dvc/.*"]
+
+[tool.pylint.messages_control]
+disable = [
+    "C0114",  # missing-module-docstring
+    "C0116",  # missing-function-docstring
+    "C0103",  # invalid-name (X, X_train are standard in ML)
+]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-ra"

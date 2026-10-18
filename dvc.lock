@@ -1,0 +1,255 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python src/data/preprocess.py data/raw/dataset.csv 
+      data/interim/inter_data.csv data/interim/dataset_preprocessed.csv
+    deps:
+    - path: data/raw/dataset.csv
+      hash: md5
+      md5: e50a70711e823b75c8ebe231468f5faf
+      size: 20118244
+    - path: src/data/preprocess.py
+      hash: md5
+      md5: bc385c6a001626d660cda3ce8ce80dc0
+      size: 5089
+    params:
+      params.yaml:
+        global.target: popularity
+        preprocess.cols_to_drop:
+        - 'Unnamed: 0'
+        - track_id
+        - artists
+        - album_name
+        - track_name
+        preprocess.missing_drop_threshold: 0.5
+        preprocess.outlier_cols:
+        - duration_ms
+        - loudness
+        - speechiness
+        preprocess.z_threshold: 3.0
+    outs:
+    - path: data/interim/dataset_preprocessed.csv
+      hash: md5
+      md5: f53e0c33fc14d3ac302d0e2996a7fda5
+      size: 8608614
+    - path: data/interim/inter_data.csv
+      hash: md5
+      md5: c5f0d78d55ac1c4bf5f4f0595a00fef4
+      size: 9027443
+  split-data:
+    cmd: python src/data/split_data.py data/interim/dataset_preprocessed.csv 
+      data/interim
+    deps:
+    - path: data/interim/dataset_preprocessed.csv
+      hash: md5
+      md5: f53e0c33fc14d3ac302d0e2996a7fda5
+      size: 8608614
+    - path: reports/preprocess_report.json
+      hash: md5
+      md5: a09510413e66b5438676fe069ab8ad95
+      size: 12841
+    - path: src/config.py
+      hash: md5
+      md5: 8014c138b52d6b7bf8809f9c0af04a0a
+      size: 889
+    - path: src/data/split_data.py
+      hash: md5
+      md5: a9f4f673e0737a0dbef26f980cf98396
+      size: 1433
+    params:
+      params.yaml:
+        global.seed: 0
+        split-data.test_split: 0.2
+        split-data.train_split: 0.8
+    outs:
+    - path: data/interim/test.csv
+      hash: md5
+      md5: 7dfd569dcbae6d9a07fc16fe04dd96af
+      size: 1722101
+    - path: data/interim/train.csv
+      hash: md5
+      md5: 76ac3e8a715848cf16e5c05237ae4cd5
+      size: 6886675
+  featurize:
+    cmd: python src/data/featurize.py data/interim data/processed
+    deps:
+    - path: data/interim/test.csv
+      hash: md5
+      md5: 7dfd569dcbae6d9a07fc16fe04dd96af
+      size: 1722101
+    - path: data/interim/train.csv
+      hash: md5
+      md5: 76ac3e8a715848cf16e5c05237ae4cd5
+      size: 6886675
+    - path: reports/split_report.json
+      hash: md5
+      md5: 215c1766e118720cdef5401a826f4048
+      size: 674
+    - path: src/config.py
+      hash: md5
+      md5: 8014c138b52d6b7bf8809f9c0af04a0a
+      size: 889
+    - path: src/data/featurize.py
+      hash: md5
+      md5: 65f959e882d8f195013ee8319149d64b
+      size: 5229
+    params:
+      params.yaml:
+        featurize.categorical_col: track_genre
+        featurize.categorical_max_unique: 15
+        featurize.one_hot_prefix: genre
+        featurize.skew_threshold: 1.0
+        global.target: popularity
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 86a54867e050afdb56ab10b2174313fe
+      size: 6203479
+    - path: data/processed/train.csv
+      hash: md5
+      md5: e405663fc82033ab79ef8eee254a6a2d
+      size: 24808039
+  train:
+    cmd: python src/modeling/train.py
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 86a54867e050afdb56ab10b2174313fe
+      size: 6203479
+    - path: data/processed/train.csv
+      hash: md5
+      md5: e405663fc82033ab79ef8eee254a6a2d
+      size: 24808039
+    - path: reports/featurize_report.json
+      hash: md5
+      md5: 0f94a2b10c2639f35a1435a93b3624b7
+      size: 328439
+    - path: src/modeling/train.py
+      hash: md5
+      md5: dbd07017bcf9c67699b05a149e25003d
+      size: 4800
+    params:
+      params.yaml:
+        global.seed: 0
+        global.target: popularity
+        split-data.test_split: 0.2
+        train.n_estimators: 100
+    outs:
+    - path: models/random_forest.pkl
+      hash: md5
+      md5: 3f3a8d29c50348251625aba4b8db82a9
+      size: 569788241
+  validate-preprocess:
+    cmd: python src/validation/validate_preprocess.py 
+      data/interim/inter_data.csv data/interim/dataset_preprocessed.csv 
+      reports/preprocess_report.json
+    deps:
+    - path: data/interim/dataset_preprocessed.csv
+      hash: md5
+      md5: f53e0c33fc14d3ac302d0e2996a7fda5
+      size: 8608614
+    - path: data/interim/inter_data.csv
+      hash: md5
+      md5: c5f0d78d55ac1c4bf5f4f0595a00fef4
+      size: 9027443
+    - path: src/validation/common.py
+      hash: md5
+      md5: 3a0d666714bec97f24820a469694ae8b
+      size: 1357
+    - path: src/validation/validate_preprocess.py
+      hash: md5
+      md5: 9d249d8e14a47176d6bd04e0d28571e9
+      size: 2705
+    params:
+      params.yaml:
+        global.target: popularity
+        preprocess.cols_to_drop:
+        - 'Unnamed: 0'
+        - track_id
+        - artists
+        - album_name
+        - track_name
+        preprocess.missing_drop_threshold: 0.5
+        preprocess.outlier_cols:
+        - duration_ms
+        - loudness
+        - speechiness
+        preprocess.z_threshold: 3.0
+    outs:
+    - path: reports/preprocess_report.json
+      hash: md5
+      md5: a09510413e66b5438676fe069ab8ad95
+      size: 12841
+  validate-split:
+    cmd: python src/validation/validate_split.py 
+      data/interim/dataset_preprocessed.csv data/interim 
+      reports/split_report.json
+    deps:
+    - path: data/interim/dataset_preprocessed.csv
+      hash: md5
+      md5: f53e0c33fc14d3ac302d0e2996a7fda5
+      size: 8608614
+    - path: data/interim/test.csv
+      hash: md5
+      md5: 7dfd569dcbae6d9a07fc16fe04dd96af
+      size: 1722101
+    - path: data/interim/train.csv
+      hash: md5
+      md5: 76ac3e8a715848cf16e5c05237ae4cd5
+      size: 6886675
+    - path: src/validation/common.py
+      hash: md5
+      md5: 3a0d666714bec97f24820a469694ae8b
+      size: 1357
+    - path: src/validation/validate_split.py
+      hash: md5
+      md5: c402a5cd0d089560cb9225a6e5c15ae3
+      size: 2778
+    params:
+      params.yaml:
+        split-data.test_split: 0.2
+    outs:
+    - path: reports/split_report.json
+      hash: md5
+      md5: 215c1766e118720cdef5401a826f4048
+      size: 674
+  validate-featurize:
+    cmd: python src/validation/validate_featurize.py data/interim data/processed
+      reports/featurize_report.json
+    deps:
+    - path: data/interim/test.csv
+      hash: md5
+      md5: 7dfd569dcbae6d9a07fc16fe04dd96af
+      size: 1722101
+    - path: data/interim/train.csv
+      hash: md5
+      md5: 76ac3e8a715848cf16e5c05237ae4cd5
+      size: 6886675
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 86a54867e050afdb56ab10b2174313fe
+      size: 6203479
+    - path: data/processed/train.csv
+      hash: md5
+      md5: e405663fc82033ab79ef8eee254a6a2d
+      size: 24808039
+    - path: src/validation/common.py
+      hash: md5
+      md5: 3a0d666714bec97f24820a469694ae8b
+      size: 1357
+    - path: src/validation/validate_featurize.py
+      hash: md5
+      md5: dca33adaea78183da20f68ca51df2f69
+      size: 6610
+    params:
+      params.yaml:
+        featurize.categorical_col: track_genre
+        featurize.categorical_max_unique: 15
+        featurize.one_hot_prefix: genre
+        featurize.skew_threshold: 1.0
+        global.target: popularity
+    outs:
+    - path: reports/featurize_report.json
+      hash: md5
+      md5: 0f94a2b10c2639f35a1435a93b3624b7
+      size: 328439

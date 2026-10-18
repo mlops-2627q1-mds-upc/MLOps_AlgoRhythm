@@ -3,13 +3,12 @@ language:
 - en
 license: bsd
 task_categories:
-- tabular-classification
+- tabular-regression
 tags:
 - music
 - arts and entertainment
 - audio
 - tabular
-- categorical
 pretty_name: Spotify Tracks Dataset
 ---
 
@@ -22,7 +21,7 @@ pretty_name: Spotify Tracks Dataset
 - **License:** BSD License
 
 ### Summary
-This dataset consists of 114,000 Spotify tracks across 125 different musical genres. Each entry contains acoustic features computed via the Spotify Web API (such as `danceability`, `energy`, `valence`, `tempo`, etc.) along with metadata such as `track_name`, `artists`, `album_name`, and `popularity`.
+This dataset consists of 114,000 Spotify tracks across 114 different musical genres. Each entry contains acoustic features computed via the Spotify Web API (such as `danceability`, `energy`, `valence`, `tempo`, etc.) along with metadata such as `track_name`, `artists`, `album_name`, and `popularity`.
 
 ---
 
@@ -52,13 +51,12 @@ The dataset contains 20 columns:
 | `valence` | Float (0.0-1.0) | Musical positiveness (happy/cheerful vs. sad/angry). |
 | `tempo` | Float (BPM) | Estimated tempo in beats per minute. |
 | `time_signature` | Integer (3-7) | Estimated time signature (e.g., `4 = 4/4`). |
-| `track_genre` | String | Musical genre assigned to the track (125 genres total). |
+| `track_genre` | String | Musical genre assigned to the track (114 genres total). |
 
 ---
 
-## 3. Data Collection & Preprocessing
-* **Source:** Collected using the **Spotify Web API**.
-* **Cleaning:** Tracks were fetched and parsed into tabular format, standardizing numerical acoustic measures and categorical tags.
+## 3. Data Collection
+* **Source:** The data was originally compiled and shared on Kaggle by Maharshi Pandya. Tracks were gathered using the **Spotify Web API** collecting roughly 1,000 tracks per genre to ensure a balanced representation across categories.
 
 ---
 

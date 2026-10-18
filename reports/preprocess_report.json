@@ -1,0 +1,407 @@
+{
+  "preprocess": {
+    "success": true,
+    "details": {
+      "success": true,
+      "statistics": {
+        "evaluated_expectations": 22,
+        "successful_expectations": 22,
+        "unsuccessful_expectations": 0,
+        "success_percent": 100.0
+      },
+      "expectations": [
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "popularity"
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "popularity",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "duration_ms",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_be_between",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "duration_ms",
+            "min_value": -95657.66264266014,
+            "max_value": 555643.4415158865
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_percent_total": 0.0,
+            "unexpected_percent_nonmissing": 0.0,
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "explicit",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_be_of_type",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "explicit",
+            "type_": "int64"
+          },
+          "result": {
+            "observed_value": "int64"
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_be_in_set",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "explicit",
+            "value_set": [
+              0,
+              1
+            ]
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_percent_total": 0.0,
+            "unexpected_percent_nonmissing": 0.0,
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "danceability",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "energy",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "key",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "loudness",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_be_between",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "loudness",
+            "min_value": -23.48527621719284,
+            "max_value": 6.8805697152799645
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_percent_total": 0.0,
+            "unexpected_percent_nonmissing": 0.0,
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "mode",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "speechiness",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_be_between",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "speechiness",
+            "min_value": -0.237402369429406,
+            "max_value": 0.4083552125547392
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_percent_total": 0.0,
+            "unexpected_percent_nonmissing": 0.0,
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "acousticness",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "instrumentalness",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "liveness",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "valence",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "tempo",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "time_signature",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        },
+        {
+          "expectation_type": "expect_column_values_to_not_be_null",
+          "success": true,
+          "kwargs": {
+            "batch_id": "pandas-preprocess",
+            "column": "track_genre",
+            "mostly": 0.5
+          },
+          "result": {
+            "element_count": 101879,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "partial_unexpected_counts": [],
+            "partial_unexpected_index_list": []
+          }
+        }
+      ],
+      "result_url": null
+    }
+  }
+}

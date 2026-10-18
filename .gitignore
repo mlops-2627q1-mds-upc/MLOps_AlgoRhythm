@@ -1,5 +1,5 @@
 # Data
-/data/
+
 
 # Mac OS-specific storage files
 .DS_Store
@@ -189,3 +189,10 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Ignorar modelos binarios pesados
+models/*.pkl
+models/random_forest.pkl
+
+# Ignore mlflow
+mlflow.db
