@@ -3,13 +3,12 @@ language:
 - en
 license: bsd
 task_categories:
-- tabular-classification
+- tabular-regression
 tags:
 - music
 - arts and entertainment
 - audio
 - tabular
-- categorical
 pretty_name: Spotify Tracks Dataset
 ---
 
@@ -56,9 +55,8 @@ The dataset contains 20 columns:
 
 ---
 
-## 3. Data Collection & Preprocessing
-* **Source:** Collected using the **Spotify Web API**.
-* **Cleaning:** Tracks were fetched and parsed into tabular format, standardizing numerical acoustic measures and categorical tags.
+## 3. Data Collection
+* **Source:** The data was originally compiled and shared on Kaggle by Maharshi Pandya. Tracks were gathered using the **Spotify Web API** collecting roughly 900 tracks per genre to ensure a balanced representation across categories.
 
 ---
 
