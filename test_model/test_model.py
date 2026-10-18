@@ -173,4 +173,4 @@ def test_model_edge_cases(trained_model, sample_row, value):
  
     assert np.isfinite(prediction)
     assert 0 <= prediction <= 100
- 
+  
