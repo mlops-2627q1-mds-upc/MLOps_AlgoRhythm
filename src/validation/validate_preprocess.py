@@ -37,7 +37,7 @@ def main(raw_path: str, preprocessed_path: str, report_path: str) -> None:
         if col in out.columns:
             raise AssertionError(f"La columna '{col}' debería haber sido eliminada durante el preprocesamiento.")
 
-    # 3. Validate remaining columns against the maximum percentage of null values ​​allowed
+    # 3. Validate remaining columns against the maximum percentage of null values allowed
     max_missing_allowed = missing_drop_threshold
     min_not_null_ratio = 1.0 - max_missing_allowed
     for col in out.columns:

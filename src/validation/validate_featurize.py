@@ -75,7 +75,7 @@ def check_imputation_statistics(
 
 def validate_split(name, df_in, df_out, expected_oh, n_rows_in, dummy_cols, cat_col, is_train):
     numeric_cols = df_in.select_dtypes(include=np.number).columns.tolist()
-    # Exclude dummy columns from the one-hot pure numerical values ​​to be evaluated statistically
+    # Exclude dummy columns from the one-hot pure numerical values to be evaluated statistically
     numeric_cols = [c for c in numeric_cols if c not in dummy_cols and c != cat_col]
 
     expectations = [
@@ -99,7 +99,7 @@ def validate_split(name, df_in, df_out, expected_oh, n_rows_in, dummy_cols, cat_
         imputation_check["success"], metrics=imputation_check["metrics"], bad_columns=imputation_check["bad_columns"]
     )
 
-    # 2. One-hot: values ​​equal the expected encoding, and row sums are consistent
+    # 2. One-hot: values equal the expected encoding, and row sums are consistent
     bad_oh = mismatched_columns(df_out, expected_oh, dummy_cols)
     row_sums = df_out[dummy_cols].sum(axis=1)
     rows_ok = (row_sums == 1).all() if is_train else (row_sums <= 1).all()

@@ -7,6 +7,7 @@ import yaml
 
 from src.validation.common import finish
 
+
 def row_hashes(df: pd.DataFrame) -> pd.Series:
     return pd.util.hash_pandas_object(df, index=False)
 
