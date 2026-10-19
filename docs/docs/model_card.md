@@ -142,8 +142,8 @@ model = mlflow.sklearn.load_model("models:/spotify_popularity_rf/latest")
 | **Best Variance (`rf-maxfeat05` - 14 feat.)** | 14 | 11.23 | **15.35** | **0.478** | **45.22 s** | **~0.000041** |
 
 > **Notes:** 
-> - **`rf-n200` (128 features):** Lowest absolute error ($MAE = 10.99$), but requires around 8x more training time and generates a larger carbon footprint.
-> - **`rf-maxfeat05` (14 features):** The most efficient model with the best explanatory power ($R^2 = 0.478$, $RMSE = 15.35$), low training time (~45 s) and low $CO_2$ emissions.
+> - **`rf-n200` ("n_estimators": 200, All 128 features):** Lowest absolute error ($MAE = 10.99$), but requires around 8x more training time and generates a larger carbon footprint.
+> - **`rf-maxfeat05` ("n_estimators": 200, "max_features": 0.5, No genre features):** The most efficient model with the best explanatory power ($R^2 = 0.478$, $RMSE = 15.35$), low training time (~45 s) and low $CO_2$ emissions.
 
 ---
 
