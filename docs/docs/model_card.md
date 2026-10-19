@@ -137,9 +137,9 @@ model = mlflow.sklearn.load_model("models:/spotify_popularity_rf/latest")
 
 | Model | Features | MAE | RMSE | R² | Training Time | CO₂ Emissions (kg) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Baseline (RF Baseline - 128 feat.)** | 128 | 11.03 | 15.89 | 0.441 | 188.81 s | ~0.000209 |
+| **Baseline (RF Baseline - 128 feat.)** | 128 | 11.23 | 15.89 | 0.441 | 188.81 s | ~0.000209 |
 | **Best Absolute MAE (`rf-n200` - 128 feat.)** | 128 | **10.99** | 15.83 | 0.445 | 341.30 s | ~0.000379 |
-| **Best Variance (`rf-maxfeat05` - 14 feat.)** | 14 | 11.23 | **15.35** | **0.478** | **45.22 s** | **~0.000041** |
+| **Best Variance (`rf-maxfeat05` - 14 feat.)** | 14 | 11.03 | **15.35** | **0.478** | **45.22 s** | **~0.000041** |
 
 > **Notes:** 
 > - **`rf-n200` ("n_estimators": 200, All 128 features):** Lowest absolute error ($MAE = 10.99$), but requires around 8x more training time and generates a larger carbon footprint.
