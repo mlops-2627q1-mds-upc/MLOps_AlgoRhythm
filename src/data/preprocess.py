@@ -1,26 +1,3 @@
-#!/usr/bin/env python3
-"""
-Stage 1 - EDA cleaning
-    1. Remove fully duplicated rows.
-    2. Drop columns with more than MISSING_DROP_THRESHOLD missing values.
-    3. Drop rows with a missing target (the target is never imputed).
-    4. Impute remaining missing values:
-         - numeric: median if |skew| > 1, mean otherwise (rounded if integer-valued)
-         - categorical: mode
-    5. (Optional) save the intermediate dataset (dataset_eda.csv).
-
-Stage 2 - Preprocessing
-    6. Remove rows that are Z-score outliers in at least one of OUTLIER_COLS.
-    7. Drop unnecessary columns.
-    8. One-hot encode the categorical column.
-    9. Final sanity checks and save.
-
-Usage:
-    python preprocessing_pipeline.py
-    python preprocessing_pipeline.py --raw-path data/raw/dataset.csv \
-        --output-path data/processed/dataset_preprocessed.csv
-"""
-
 import sys
 
 import pandas as pd
