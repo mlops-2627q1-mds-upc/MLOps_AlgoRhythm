@@ -65,5 +65,3 @@ The model predicts Spotify’s popularity score, not general music quality or an
    ```bash
    pytest -v
    ```
-
-"""
