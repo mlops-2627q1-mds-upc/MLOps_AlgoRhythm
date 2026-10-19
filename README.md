@@ -29,4 +29,41 @@ The project focuses on a reproducible Machine Learning workflow. It uses DVC to 
 ## Limitations
 The model predicts Spotify’s popularity score, not general music quality or an artist’s success. Popularity reflects Spotify’s data at the time of collection and may change over time. The model also excludes artist identity, and its performance may change as music trends and Spotify’s user behaviour change.
 
---------
+## Setup and Execution
+
+1. **Create a virtual environment** inside the project folder:
+
+   ```bash
+   python -m venv .venv
+   ```
+
+2. **Activate the virtual environment:**
+     ```bash
+     source .venv/bin/activate
+     ```
+
+3. **Install the dependencies** listed in `requirements.txt`:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Execute the entire DVC pipeline**:
+
+   ```bash
+   dvc repro
+   ```
+
+5. **Run static code analysis** using Pylint:
+
+   ```bash
+   pylint .
+   ```
+
+6. **Execute all tests** using pytest:
+
+   ```bash
+   pytest -v
+   ```
+
+"""
