@@ -11,13 +11,11 @@ from src.validation.common import finish, run_validation
 
 
 def expected_one_hot(df: pd.DataFrame, col: str, prefix: str, categories: list) -> pd.DataFrame:
-    """One-hot encode `col` with a fixed category list; unseen categories become all zeros."""
     dummies = pd.get_dummies(pd.Categorical(df[col], categories=categories), prefix=prefix, dtype=int)
     return pd.concat([df.drop(columns=[col]), dummies], axis=1)
 
 
 def mismatched_columns(actual: pd.DataFrame, expected: pd.DataFrame, cols: list) -> list:
-    """Columns whose values differ between actual and expected (NaN == NaN)."""
     bad = []
     for c in cols:
         a, e = actual[c], expected[c]
@@ -37,10 +35,7 @@ def check(success: bool, **details) -> dict:
 def check_imputation_statistics(
     df_in: pd.DataFrame, df_out: pd.DataFrame, numeric_cols: list, rel_tol: float = 0.1
 ) -> dict:
-    """
-    Valida que la media, mediana y desviación estándar de las columnas numéricas
-    no varíen más allá de una tolerancia relativa (rel_tol) tras la imputación.
-    """
+
     bad_cols = []
     metrics_details = {}
 
@@ -48,22 +43,22 @@ def check_imputation_statistics(
         if col not in df_in.columns or col not in df_out.columns:
             continue
 
-        # Estadísticas previas a la imputación (pandas ignora NaN por defecto)
+        # Pre-imputation statistics (pandas ignores NaN by default)
         mean_in = df_in[col].mean()
         median_in = df_in[col].median()
         std_in = df_in[col].std()
 
-        # Estadísticas posteriores a la imputación
+        # Post-accusation statistics
         mean_out = df_out[col].mean()
         median_out = df_out[col].median()
         std_out = df_out[col].std()
 
-        # Calcular diferencia relativa (evitando división por cero)
+        # Calculate relative difference (avoiding division by zero)
         mean_diff = abs(mean_out - mean_in) / (abs(mean_in) + 1e-9)
         median_diff = abs(median_out - median_in) / (abs(median_in) + 1e-9)
         std_diff = abs(std_out - std_in) / (abs(std_in) + 1e-9)
 
-        # Si alguna métrica supera la tolerancia permitida (ej. 10%)
+        # If any metric exceeds the allowed tolerance (e.g., 10%)
         is_ok = (mean_diff <= rel_tol) and (median_diff <= rel_tol) and (std_diff <= rel_tol)
 
         if not is_ok:
@@ -79,9 +74,8 @@ def check_imputation_statistics(
 
 
 def validate_split(name, df_in, df_out, expected_oh, n_rows_in, dummy_cols, cat_col, is_train):
-    """Build all validations for one split (train or test)."""
     numeric_cols = df_in.select_dtypes(include=np.number).columns.tolist()
-    # Excluir columnas dummy del one-hot de las numéricas puras a evaluar por estadística
+    # Exclude dummy columns from the one-hot pure numerical values ​​to be evaluated statistically
     numeric_cols = [c for c in numeric_cols if c not in dummy_cols and c != cat_col]
 
     expectations = [
@@ -99,13 +93,13 @@ def validate_split(name, df_in, df_out, expected_oh, n_rows_in, dummy_cols, cat_
         results[f"{name}_values"] = check(False, reason="shape or columns differ from expected; see GX results")
         return results
 
-    # 1. Validación de Imputación por estabilidad estadística (Media, Mediana y DS)
+    # 1. Validation of Imputation by Statistical Stability (Mean, Median and SD)
     imputation_check = check_imputation_statistics(df_in, df_out, numeric_cols, rel_tol=0.1)
     results[f"{name}_imputation_stats"] = check(
         imputation_check["success"], metrics=imputation_check["metrics"], bad_columns=imputation_check["bad_columns"]
     )
 
-    # 2. One-hot: values equal the expected encoding, and row sums are consistent[cite: 5]
+    # 2. One-hot: values ​​equal the expected encoding, and row sums are consistent
     bad_oh = mismatched_columns(df_out, expected_oh, dummy_cols)
     row_sums = df_out[dummy_cols].sum(axis=1)
     rows_ok = (row_sums == 1).all() if is_train else (row_sums <= 1).all()

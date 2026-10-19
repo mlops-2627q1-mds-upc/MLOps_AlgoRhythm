@@ -11,10 +11,6 @@ def change_type(df) -> pd.DataFrame:
 
 
 def drop_duplicates(df) -> pd.DataFrame:
-    """
-    Given a dataframe, drops duplicated rows.
-    """
-    # Duplicates (before imputing, so they are detected on the raw values)
     n_dup = int(df.duplicated().sum())
     logger.info("Fully duplicated rows: {}", n_dup, 100 * n_dup / max(len(df), 1))
     df = df.drop_duplicates().reset_index(drop=True)
@@ -24,9 +20,6 @@ def drop_duplicates(df) -> pd.DataFrame:
 
 
 def drop_columns_empty(df, missing_drop_threshold: float) -> pd.DataFrame:
-    """
-    Given a dataframe and a threshold, drops columns that have more missing values than the threshold.
-    """
     missing_pct = df.isna().mean()
     cols_to_drop = missing_pct.index[missing_pct > missing_drop_threshold].tolist()
     df = df.drop(columns=cols_to_drop)
@@ -35,10 +28,6 @@ def drop_columns_empty(df, missing_drop_threshold: float) -> pd.DataFrame:
 
 
 def drop_rows_no_target(df, target: str) -> pd.DataFrame:
-    """
-    Given a dataframe and the target, drops rows that have no value in target variable.
-    """
-    # Never impute the target: rows without target are dropped
     if target and target in df.columns:
         before = len(df)
         df = df.dropna(subset=[target]).reset_index(drop=True)
@@ -47,9 +36,6 @@ def drop_rows_no_target(df, target: str) -> pd.DataFrame:
 
 
 def drop_columns_not_informative(df: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
-    """
-    Given a dataframe and a list of columns with information not important for our problem to drop, drops those columns.
-    """
     cols_present = [c for c in cols if c in df.columns]
     df = df.drop(columns=cols, errors="ignore")
     logger.info("Dropped columns: {} | shape: {}", cols_present, df.shape)
@@ -57,9 +43,6 @@ def drop_columns_not_informative(df: pd.DataFrame, cols: list[str]) -> pd.DataFr
 
 
 def remove_outliers(df, cols: list[str], z_threshold: float) -> pd.DataFrame:
-    """
-    Given a dataframe removes rows that are outliers
-    """
     missing_cols = [c for c in cols if c not in df.columns]
     if missing_cols:
         raise KeyError(f"Outlier columns not found in the dataset: {missing_cols}")
