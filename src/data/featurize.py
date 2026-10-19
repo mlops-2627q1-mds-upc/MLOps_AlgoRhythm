@@ -10,10 +10,6 @@ from src.config import TEST_FILE, TRAIN_FILE
 
 
 def classify_variables(df, target: str, categorical_max_unique: int) -> tuple[list[str], list[str], list[str]]:
-    """
-    Classifies the dataframe columns in numerical and categorical.
-    Must be called on the training set only.
-    """
     numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
     categorical_cols = df.select_dtypes(exclude=np.number).columns.tolist()
 
@@ -30,11 +26,6 @@ def classify_variables(df, target: str, categorical_max_unique: int) -> tuple[li
 
 
 def fit_imputer(train_df: pd.DataFrame, target: str, categorical_max_unique: int, skew_threshold: float) -> dict:
-    """
-    Learns the fill value of every column using the training set only
-    (median/mean for numeric columns, mode for categorical ones).
-    Returns a {column: fill_value} dict.
-    """
     numeric_cols, categorical_cols, integer_cols = classify_variables(train_df, target, categorical_max_unique)
 
     fill_values = {}
@@ -61,19 +52,12 @@ def fit_imputer(train_df: pd.DataFrame, target: str, categorical_max_unique: int
 
 
 def apply_imputer(df: pd.DataFrame, fill_values: dict, name: str) -> pd.DataFrame:
-    """
-    Imputes missing values using the fill values learned on train.
-    """
     df = df.copy().fillna(value=fill_values)
     logger.info("[{}] Remaining missing values: {}", name, int(df.isna().sum().sum()))
     return df
 
 
 def one_hot_encode(df: pd.DataFrame, col: str, prefix: str, categories: list, name: str) -> pd.DataFrame:
-    """
-    One-hot encodes `col` using a fixed list of categories (learned on train),
-    so train and test end up with exactly the same columns in the same order.
-    """
     if col not in df.columns:
         raise KeyError(f"Categorical column '{col}' not found in the dataset")
 

@@ -7,20 +7,20 @@ import yaml
 
 from src.validation.common import finish
 
+
 def row_hashes(df: pd.DataFrame) -> pd.Series:
-    """One hash per row, ignoring the index, so rows can be compared across DataFrames."""
     return pd.util.hash_pandas_object(df, index=False)
 
 
 def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
-    # 1. Cargar parámetros desde params.yaml
+    # 1. Load parameters from params.yaml
     with open("params.yaml", encoding="utf-8") as f:
         params = yaml.safe_load(f)
 
     train_split_target = params["split-data"]["train_split"]
     test_split_target = params["split-data"]["test_split"]
 
-    # 2. Cargar datasets
+    # 2. Load datasets
     full = pd.read_csv(preprocessed_path)
     train = pd.read_csv(f"{split_dir}/train.csv")
     test = pd.read_csv(f"{split_dir}/test.csv")
@@ -29,14 +29,14 @@ def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
     n_train = len(train)
     n_test = len(test)
 
-    # 3. Calcular proporciones reales
+    # 3. Calculate actual proportions
     actual_train_ratio = n_train / n_total if n_total > 0 else 0
     actual_test_ratio = n_test / n_total if n_total > 0 else 0
 
-    # 4. Definir una tolerancia estricta (ej. 1% de variación permitida por redondeos)
+    # 4. Define a strict tolerance (e.g., 1% variation allowed for rounding)
     tolerance = 0.01
 
-    # 5. Validaciones personalizadas para los tamaños/proporciones
+    # 5. Customized validations for sizes/proportions
     train_proportional_success = abs(actual_train_ratio - train_split_target) <= tolerance
     test_proportional_success = abs(actual_test_ratio - test_split_target) <= tolerance
 
@@ -76,7 +76,7 @@ def main(preprocessed_path: str, split_dir: str, report_path: str) -> None:
         },
     }
 
-    # 6. Finalizar y generar reporte
+    # 6. Finalize and generate report
     finish(results, report_path)
 
 
