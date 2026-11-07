@@ -1,0 +1,9 @@
+version: "3.9"
+
+services:
+  algorythm-api:
+    build: .
+    container_name: algorythm-mlops-api
+    ports:
+      - "8080:8080"
+    restart: always

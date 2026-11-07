@@ -1,25 +1,15 @@
-ipython
-jupyterlab
-loguru
-matplotlib
-mkdocs
-notebook
+# Servidor Web y Framework de API
+fastapi
+uvicorn
+pydantic
+
+# Ciencia de Datos e Inferencia de ML
+scikit-learn
 numpy
 pandas
-pip
-pytest
-pylint
+
+# Utilidades del Servidor y Logs
 python-dotenv
-ruff
-dagshub
-mlflow
-scikit-learn
-tqdm
+loguru
 typer
-pytest 
-pytest-cov
-great_expectations
-black 
-isort
-codecarbon==2.8.3
--e .
+tqdm

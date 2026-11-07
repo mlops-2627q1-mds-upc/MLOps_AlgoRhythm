@@ -1,0 +1,33 @@
+# Control de versiones y DVC
+.git
+.gitignore
+.dvc
+.dvcignore
+.dvc/cache
+
+# Datasets locales (crucial omitir)
+data/
+
+# Documentación y MkDocs
+docs/
+mkdocs.yml
+README.md
+
+# Código de desarrollo/entrenamiento no usado en la API
+src/data/
+src/modeling/
+src/validation/
+
+# Entornos virtuales y dependencias de desarrollo
+venv/
+.venv/
+requirements-dev.txt
+
+# Temporales y caches de Python / Pytest
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+notebooks/

@@ -1,0 +1,28 @@
+# Heredar dependencias de producción
+-r requirements.txt
+
+# Notebooks, Visualización y Documentación
+ipython
+jupyterlab
+notebook
+matplotlib
+mkdocs
+
+# Calidad de Código, Formato y Calidad (Linting)
+pylint
+ruff
+black
+isort
+
+# Pruebas Unitarias y Validación de Datos
+pytest
+pytest-cov
+great_expectations
+
+# Experimentación, Métricas y MLOps
+mlflow
+dagshub
+codecarbon==2.8.3
+
+# Instalación editable del paquete local
+-e .
