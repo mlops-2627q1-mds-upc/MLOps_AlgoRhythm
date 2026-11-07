@@ -71,6 +71,7 @@ class SongFeatures(BaseModel):
     tempo: float = Field(..., example=122.0, description="Tempo estimado en BPM")
     duration_ms: int = Field(..., example=210000, description="Duración de la canción en milisegundos")
     explicit: int = Field(..., example=0, description="1 si tiene contenido explícito, 0 en caso contrario")
+    genre: str = Field(..., example="pop", description="Género musical de la canción")
     
     # Si tu dataset ya fue featurizado a columnas One-Hot u omitió variables de texto,
     # asegúrate de incluir las columnas exactamente como las espera X_train.
@@ -94,22 +95,32 @@ def health_check() -> Dict[str, str]:
 
 @app.post("/predict", response_model=PredictionOutput, tags=["Inferencia"])
 def predict(features: SongFeatures) -> PredictionOutput:
-    """
-    Recibe los atributos de una única canción en formato JSON 
-    y devuelve directamente su predicción de popularidad.
-    """
     if model is None:
         raise HTTPException(status_code=500, detail="El modelo no se encuentra disponible.")
 
     try:
-        # Convertir el objeto Pydantic a un DataFrame de 1 sola fila
         data_dict = features.model_dump()
-        input_df = pd.DataFrame([data_dict])
+        genre_val = data_dict.pop("genre")  # Extraemos el género para el one-hot encoding
 
-        # Realizar la inferencia con el Random Forest
+        # Inicializar un diccionario con ceros para todas las columnas que el Random Forest espera
+        input_data = {col: 0 for col in model.feature_names_in_}
+
+        # Asignar los valores numéricos enviados por el usuario
+        for key, val in data_dict.items():
+            if key in input_data:
+                input_data[key] = val
+
+        # Activar la columna one-hot correspondiente al género recibido
+        genre_column = f"genre_{genre_val}"
+        if genre_column in input_data:
+            input_data[genre_column] = 1
+
+        # Crear el DataFrame de una sola fila con el orden exacto de características
+        input_df = pd.DataFrame([input_data])
+
+        # Realizar la inferencia
         prediction = model.predict(input_df)
 
-        # Retornar el valor escalar flotante
         return PredictionOutput(predicted_popularity=round(float(prediction[0]), 2))
 
     except Exception as e:
