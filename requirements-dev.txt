@@ -17,6 +17,7 @@ isort
 # Pruebas Unitarias y Validación de Datos
 pytest
 pytest-cov
+httpx
 great_expectations
 
 # Experimentación, Métricas y MLOps

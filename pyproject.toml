@@ -68,3 +68,6 @@ line_length = 120
 pythonpath = ["."]
 testpaths = ["tests"]
 addopts = "-ra"
+markers = [
+    "integration: tests that use the trained model and DVC-managed test data",
+]
