@@ -10,6 +10,20 @@ from src.config import MODELS_DIR, PROCESSED_DATA_DIR, TEST_FILE
 
 
 @pytest.mark.integration
+def test_health_with_real_trained_model():
+    """Check the health endpoint after the real model loads at startup."""
+    model_path = MODELS_DIR / "random_forest.pkl"
+    if not model_path.exists():
+        pytest.skip("Real model is unavailable; run dvc pull or dvc repro")
+
+    with TestClient(api.app) as client:
+        response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok", "model_loaded": "true"}
+
+
+@pytest.mark.integration
 def test_predict_with_real_trained_model():
     """Exercise the HTTP endpoint with the trained artifact and a held-out row."""
     model_path = MODELS_DIR / "random_forest.pkl"
