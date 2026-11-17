@@ -1,12 +1,14 @@
 from contextlib import asynccontextmanager
 from typing import Dict, Any
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 import joblib
 import pandas as pd
 from pydantic import BaseModel, Field
 from loguru import logger
 
 from src.config import MODELS_DIR
+
+from src.domain.user import User, UserRole
 
 # ------------------------------------------------------------------------------
 # 1. Variables globales y carga del modelo
@@ -81,6 +83,48 @@ class PredictionOutput(BaseModel):
     """Esquema de respuesta simple y directo."""
     predicted_popularity: float = Field(..., example=75.4, description="Popularidad predicha para la canción")
 
+
+
+# -------------- TEST AUTHORIZATION --------------
+
+def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
+    return current_user
+
+def get_admin_user(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=403, 
+            detail="You do not have permission to access this resource."
+        )
+    return current_user
+
+@app.get("/public-endpoint")
+def function_public_endpoint():
+    return {"message": "Welcome! Anyone can access this endpoint."}
+
+@app.get("/signed-in-endpoint")
+def function_signed_endpoint(current_user: User = Depends(get_current_active_user)):
+    return {
+        "message": f"Hello {current_user.username}! You have access to this signed endpoint.",
+        "user_role": current_user.role
+    }
+
+@app.get("/users/{user_id}/owner-endpoint")
+def function_owner_endpoint(user_id, current_user: User = Depends(get_current_active_user)):
+    if current_user.user_id != user_id:
+        raise HTTPException(
+            status_code=403, 
+            detail="You do not have permission to access this resource."
+            )
+    result = "You are the owner"
+    return {"message": f"Hello {current_user.username} {result} of this resource." }
+    
+@app.get("/admin-endpoint")
+def function_admin_endpoint(current_user: User = Depends(get_admin_user)):
+    return {
+        "message": f"Hello {current_user.username}! You have access to this admin endpoint.",
+        "user_role": current_user.role
+    }
 
 # ------------------------------------------------------------------------------
 # 3. Endpoints de la API

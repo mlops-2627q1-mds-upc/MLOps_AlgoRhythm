@@ -12,4 +12,13 @@ class User(BaseModel):
     username: str = Field(..., description="Username of the user")
     role: UserRole = Field(default=UserRole.USER, description="Role of the user, either 'admin' or 'user'")
     stored_songs: list[dict] = Field(default_factory=list, description="List of stored songs for the user")
+
+
+def get_current_user() -> User:
+    """
+    Simula la obtención del usuario actual.
+    En un escenario real, esto podría implicar la decodificación de un token JWT o la consulta a una base de datos.
+    """
+    # Para propósitos de prueba, devolvemos un usuario admin por defecto
+    return User(username="test_admin", role=UserRole.ADMIN)
     
