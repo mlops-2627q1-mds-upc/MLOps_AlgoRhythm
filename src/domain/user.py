@@ -10,5 +10,6 @@ class UserRole(str, Enum):
 class User(BaseModel):
     user_id: UUID = Field(default_factory=uuid4, description="Unique identifier for the user")
     username: str
-    email: 
+    email: EmailStr
+    role: UserRole = Field(default=UserRole.USER, description="Role of the user, either 'admin' or 'user'")
     
