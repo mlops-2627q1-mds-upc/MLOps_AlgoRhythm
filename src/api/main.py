@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import Dict, Any
 from fastapi import FastAPI, HTTPException, Depends
+from sqlalchemy.orm import Session
 import joblib
 import pandas as pd
 from pydantic import BaseModel, Field
@@ -9,6 +10,7 @@ from loguru import logger
 from src.config import MODELS_DIR
 
 from src.domain.user import User, UserRole
+from src.database import get_db
 
 # ------------------------------------------------------------------------------
 # 1. Variables globales y carga del modelo
@@ -86,6 +88,12 @@ class PredictionOutput(BaseModel):
 
 
 # -------------- TEST AUTHORIZATION --------------
+
+def get_current_user(db: Session = Depends(get_db)) -> User:
+    user = db.query(User).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated.")
+    return user
 
 def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
     return current_user
