@@ -9,7 +9,7 @@ class UserRole(str, Enum):
 
 class User(BaseModel):
     user_id: UUID = Field(default_factory=uuid4, description="Unique identifier for the user")
-    username: str
-    email: EmailStr
+    username: str = Field(..., description="Username of the user")
     role: UserRole = Field(default=UserRole.USER, description="Role of the user, either 'admin' or 'user'")
+    stored_songs: list[dict] = Field(default_factory=list, description="List of stored songs for the user")
     
