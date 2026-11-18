@@ -23,7 +23,7 @@ great_expectations
 # Experimentación, Métricas y MLOps
 mlflow
 dagshub
-codecarbon==2.8.3
+codecarbon
 
 # Instalación editable del paquete local
 -e .

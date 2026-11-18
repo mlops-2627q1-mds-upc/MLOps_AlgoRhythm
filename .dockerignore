@@ -11,7 +11,7 @@ data/
 # Documentación y MkDocs
 docs/
 mkdocs.yml
-README.md
+# README.md
 
 # Código de desarrollo/entrenamiento no usado en la API
 src/data/
@@ -21,7 +21,7 @@ src/validation/
 # Entornos virtuales y dependencias de desarrollo
 venv/
 .venv/
-requirements-dev.txt
+# requirements-dev.txt
 
 # Temporales y caches de Python / Pytest
 __pycache__/

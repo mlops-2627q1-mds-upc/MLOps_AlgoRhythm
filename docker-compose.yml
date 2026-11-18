@@ -1,9 +1,17 @@
-version: "3.9"
-
 services:
   algorythm-api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: algorythm-mlops-api
     ports:
       - "8080:8080"
     restart: always
+
+
+  algorythm-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+      # Optional: overrides the default CMD to run a specific test file or output verbose results
+    command: python -m pytest tests/test_auth.py -v
