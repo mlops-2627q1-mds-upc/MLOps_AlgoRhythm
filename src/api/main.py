@@ -1,12 +1,15 @@
 from contextlib import asynccontextmanager
 from typing import Dict, Any
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
+from sqlalchemy.orm import Session
 import joblib
-import pandas as pd
 from pydantic import BaseModel, Field
 from loguru import logger
 
 from src.config import MODELS_DIR
+
+from src.domain.user import User, UserRole
+from src.database import get_db
 
 # ------------------------------------------------------------------------------
 # 1. Variables globales y carga del modelo
@@ -58,20 +61,20 @@ class SongFeatures(BaseModel):
     la popularidad de una sola canción.
     Ajusta los nombres de las columnas a las características exactas de tu dataset.
     """
-    danceability: float = Field(..., example=0.65, description="Bailabilidad de la canción (0.0 a 1.0)")
-    energy: float = Field(..., example=0.82, description="Energía de la canción (0.0 a 1.0)")
-    key: int = Field(..., example=5, description="Tono de la canción (Pitch Class Notation)")
-    loudness: float = Field(..., example=-4.2, description="Volumen general en dB")
-    mode: int = Field(..., example=1, description="Modalidad (1 = Mayor, 0 = Menor)")
-    speechiness: float = Field(..., example=0.05, description="Presencia de palabras habladas")
-    acousticness: float = Field(..., example=0.12, description="Acústica de la canción")
-    instrumentalness: float = Field(..., example=0.001, description="Probabilidad de que sea instrumental")
-    liveness: float = Field(..., example=0.18, description="Presencia de audiencia en vivo")
-    valence: float = Field(..., example=0.55, description="Positividad musical (0.0 a 1.0)")
-    tempo: float = Field(..., example=122.0, description="Tempo estimado en BPM")
-    duration_ms: int = Field(..., example=210000, description="Duración de la canción en milisegundos")
-    explicit: int = Field(..., example=0, description="1 si tiene contenido explícito, 0 en caso contrario")
-    genre: str = Field(..., example="pop", description="Género musical de la canción")
+    danceability: float = Field(..., json_schema_extra={"example": 0.65}, description="Bailabilidad de la canción (0.0 a 1.0)")
+    energy: float = Field(..., json_schema_extra={"example": 0.82}, description="Energía de la canción (0.0 a 1.0)")
+    key: int = Field(..., json_schema_extra={"example": 5}, description="Tono de la canción (Pitch Class Notation)")
+    loudness: float = Field(..., json_schema_extra={"example": -4.2}, description="Volumen general en dB")
+    mode: int = Field(..., json_schema_extra={"example": 1}, description="Modalidad (1 = Mayor, 0 = Menor)")
+    speechiness: float = Field(..., json_schema_extra={"example": 0.05}, description="Presencia de palabras habladas")
+    acousticness: float = Field(..., json_schema_extra={"example": 0.12}, description="Acústica de la canción")
+    instrumentalness: float = Field(..., json_schema_extra={"example": 0.001}, description="Probabilidad de que sea instrumental")
+    liveness: float = Field(..., json_schema_extra={"example": 0.18}, description="Presencia de audiencia en vivo")
+    valence: float = Field(..., json_schema_extra={"example": 0.55}, description="Positividad musical (0.0 a 1.0)")
+    tempo: float = Field(..., json_schema_extra={"example": 122.0}, description="Tempo estimado en BPM")
+    duration_ms: int = Field(..., json_schema_extra={"example": 210000}, description="Duración de la canción en milisegundos")
+    explicit: int = Field(..., json_schema_extra={"example": 0}, description="1 si tiene contenido explícito, 0 en caso contrario")
+    genre: str = Field(..., json_schema_extra={"example": "pop"}, description="Género musical de la canción")
     
     # Si tu dataset ya fue featurizado a columnas One-Hot u omitió variables de texto,
     # asegúrate de incluir las columnas exactamente como las espera X_train.
@@ -79,8 +82,56 @@ class SongFeatures(BaseModel):
 
 class PredictionOutput(BaseModel):
     """Esquema de respuesta simple y directo."""
-    predicted_popularity: float = Field(..., example=75.4, description="Popularidad predicha para la canción")
+    predicted_popularity: float = Field(..., json_schema_extra={"example": 75.4}, description="Popularidad predicha para la canción")
 
+
+
+# -------------- TEST AUTHORIZATION --------------
+
+def get_current_user(db: Session = Depends(get_db)) -> User:
+    user = db.query(User).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated.")
+    return user
+
+def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
+    return current_user
+
+def get_admin_user(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=403, 
+            detail="You do not have permission to access this resource."
+        )
+    return current_user
+
+@app.get("/public-endpoint")
+def function_public_endpoint():
+    return {"message": "Welcome! Anyone can access this endpoint."}
+
+@app.get("/signed-in-endpoint")
+def function_signed_endpoint(current_user: User = Depends(get_current_active_user)):
+    return {
+        "message": f"Hello {current_user.username}! You have access to this signed endpoint.",
+        "user_role": current_user.role
+    }
+
+@app.get("/users/{user_id}/owner-endpoint")
+def function_owner_endpoint(user_id: int, current_user: User = Depends(get_current_active_user)):
+    if current_user.user_id != user_id:
+        raise HTTPException(
+            status_code=403, 
+            detail="You do not have permission to access this resource."
+            )
+    result = "You are the owner"
+    return {"message": f"Hello {current_user.username} {result} of this resource." }
+    
+@app.get("/admin-endpoint")
+def function_admin_endpoint(current_user: User = Depends(get_admin_user)):
+    return {
+        "message": f"Hello {current_user.username}! You have access to this admin endpoint.",
+        "user_role": current_user.role
+    }
 
 # ------------------------------------------------------------------------------
 # 3. Endpoints de la API
@@ -95,37 +146,4 @@ def health_check() -> Dict[str, str]:
 
 @app.post("/predict", response_model=PredictionOutput, tags=["Inferencia"])
 def predict(features: SongFeatures) -> PredictionOutput:
-    if model is None:
-        raise HTTPException(status_code=500, detail="El modelo no se encuentra disponible.")
-
-    try:
-        data_dict = features.model_dump()
-        genre_val = data_dict.pop("genre")  # Extraemos el género para el one-hot encoding
-
-        # Inicializar un diccionario con ceros para todas las columnas que el Random Forest espera
-        input_data = {col: 0 for col in model.feature_names_in_}
-
-        # Asignar los valores numéricos enviados por el usuario
-        for key, val in data_dict.items():
-            if key in input_data:
-                input_data[key] = val
-
-        # Activar la columna one-hot correspondiente al género recibido
-        genre_column = f"genre_{genre_val}"
-        if genre_column in input_data:
-            input_data[genre_column] = 1
-
-        # Crear el DataFrame de una sola fila con el orden exacto de características
-        input_df = pd.DataFrame([input_data])
-
-        # Realizar la inferencia
-        prediction = model.predict(input_df)
-
-        return PredictionOutput(predicted_popularity=round(float(prediction[0]), 2))
-
-    except Exception as e:
-        logger.error(f"Error realizando la predicción: {e}")
-        raise HTTPException(
-            status_code=400, 
-            detail=f"Error en el formato de datos o en la inferencia: {str(e)}"
-        )
+    return None
