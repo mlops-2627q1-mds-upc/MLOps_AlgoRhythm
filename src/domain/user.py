@@ -35,8 +35,10 @@ class User(BaseModel):
         """Return whether this user has the administrator role."""
         return self.role == UserRole.ADMIN
 
-    def add_song(self, song: dict[str, Any], actor_user_id: UUID | str) -> None:
-        """Save a song only when the caller is this user's owner."""
-        if str(actor_user_id) != self.get_id():
-            raise PermissionError("A user can only add songs to their own collection.")
+    def add_song(self, song: dict[str, Any]) -> None:
+        """Add a song to this user's in-memory collection.
+
+        The calling service is responsible for checking ownership before it
+        invokes this operation.
+        """
         self.stored_songs.append(song)
