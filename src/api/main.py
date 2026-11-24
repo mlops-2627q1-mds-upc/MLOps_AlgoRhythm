@@ -8,8 +8,10 @@ from loguru import logger
 
 from src.config import MODELS_DIR
 
-from src.domain.user import User, UserRole
+from src.api.auth import get_current_user, get_admin_user
 from src.database import get_db
+from src.domain.user import User
+from src.domain import UserService
 
 # ------------------------------------------------------------------------------
 # 1. Variables globales y carga del modelo
@@ -88,44 +90,22 @@ class PredictionOutput(BaseModel):
 
 # -------------- TEST AUTHORIZATION --------------
 
-def get_current_user(db: Session = Depends(get_db)) -> User:
-    user = db.query(User).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="Not authenticated.")
-    return user
-
-def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
-    return current_user
-
-def get_admin_user(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.role != UserRole.ADMIN:
-        raise HTTPException(
-            status_code=403, 
-            detail="You do not have permission to access this resource."
-        )
-    return current_user
-
 @app.get("/public-endpoint")
 def function_public_endpoint():
     return {"message": "Welcome! Anyone can access this endpoint."}
 
 @app.get("/signed-in-endpoint")
-def function_signed_endpoint(current_user: User = Depends(get_current_active_user)):
+def function_signed_endpoint(current_user: User = Depends(get_current_user)):
     return {
         "message": f"Hello {current_user.username}! You have access to this signed endpoint.",
         "user_role": current_user.role
     }
 
 @app.get("/users/{user_id}/owner-endpoint")
-def function_owner_endpoint(user_id: int, current_user: User = Depends(get_current_active_user)):
-    if current_user.user_id != user_id:
-        raise HTTPException(
-            status_code=403, 
-            detail="You do not have permission to access this resource."
-            )
-    result = "You are the owner"
-    return {"message": f"Hello {current_user.username} {result} of this resource." }
-    
+def function_owner_endpoint(user_id: int, current_user: User = Depends(get_current_user)):
+    # logic done in userService
+    return None
+
 @app.get("/admin-endpoint")
 def function_admin_endpoint(current_user: User = Depends(get_admin_user)):
     return {
@@ -143,6 +123,24 @@ def health_check() -> Dict[str, str]:
         raise HTTPException(status_code=503, detail="El modelo aún no está listo o falló al cargar.")
     return {"status": "ok", "model_loaded": "true"}
 
+@app.post("/users/{user_id}/songs")
+def add_user_song(
+    user_id: int,
+    song: SongFeatures,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    target_user = db.query(User).filter(User.user_id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    try:
+        UserService.add_song(target_user, song.model_dump(), current_user.get_id())
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+    db.commit()
+    return {"status": "saved"}
 
 @app.post("/predict", response_model=PredictionOutput, tags=["Inferencia"])
 def predict(features: SongFeatures) -> PredictionOutput:
