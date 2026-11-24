@@ -10,6 +10,12 @@ class UserService:
     """Coordinate user operations (the ``System`` lifeline in the UML)."""
 
     @staticmethod
+    def ensure_owner(target_user: User, actor_id: UUID | str) -> None:
+        """Raise a PermissionError if the actor is not the owner of the target user."""
+        if str(actor_id) != target_user.get_id():
+            raise PermissionError("A user can only access or modify their own account.")
+
+    @staticmethod
     def add_song(
         user: User,
         song: dict[str, Any],
@@ -20,7 +26,5 @@ class UserService:
         ``authenticated_user_id`` must come from the application's
         authentication layer; it must not be trusted from the song request.
         """
-        if str(authenticated_user_id) != user.get_id():
-            raise PermissionError("A user can only add songs to their own collection.")
-
+        UserService.ensure_owner(user, authenticated_user_id)
         user.add_song(song)
