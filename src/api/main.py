@@ -144,4 +144,37 @@ def add_user_song(
 
 @app.post("/predict", response_model=PredictionOutput, tags=["Inferencia"])
 def predict(features: SongFeatures) -> PredictionOutput:
-    return None
+    if model is None:
+        raise HTTPException(status_code=500, detail="El modelo no se encuentra disponible.")
+
+    try:
+        data_dict = features.model_dump()
+        genre_val = data_dict.pop("genre")  # Extraemos el género para el one-hot encoding
+
+        # Inicializar un diccionario con ceros para todas las columnas que el Random Forest espera
+        input_data = {col: 0 for col in model.feature_names_in_}
+
+        # Asignar los valores numéricos enviados por el usuario
+        for key, val in data_dict.items():
+            if key in input_data:
+                input_data[key] = val
+
+        # Activar la columna one-hot correspondiente al género recibido
+        genre_column = f"genre_{genre_val}"
+        if genre_column in input_data:
+            input_data[genre_column] = 1
+
+        # Crear el DataFrame de una sola fila con el orden exacto de características
+        input_df = pd.DataFrame([input_data])
+
+        # Realizar la inferencia
+        prediction = model.predict(input_df)
+
+        return PredictionOutput(predicted_popularity=round(float(prediction[0]), 2))
+
+    except Exception as e:
+        logger.error(f"Error realizando la predicción: {e}")
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Error en el formato de datos o en la inferencia: {str(e)}"
+        )
