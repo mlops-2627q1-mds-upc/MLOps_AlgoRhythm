@@ -14,4 +14,4 @@ services:
       context: .
       dockerfile: Dockerfile.test
       # Optional: overrides the default CMD to run a specific test file or output verbose results
-    command: python -m pytest tests/test_auth.py -v
+    command: python -m pytest tests/test_domain.py -v

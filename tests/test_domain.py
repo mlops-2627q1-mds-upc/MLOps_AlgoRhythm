@@ -3,6 +3,7 @@
 import pytest
 from sklearn.dummy import DummyRegressor
 
+
 from src.domain import Model, User, UserRole, UserService
 
 

@@ -1,6 +1,7 @@
 import enum
 from sqlalchemy import Column, Enum, Integer, String, JSON
-from pydantic import BaseModel, Field, EmailStr
+from sqlalchemy.ext.mutable import MutableList
+from typing import Any
 
 from src.database import Base
 
@@ -16,7 +17,7 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String, nullable=False)
     role = Column(Enum(UserRole), default=UserRole.USER)
-    stored_songs = Column(JSON, default=list, nullable=False)
+    stored_songs = Column(MutableList.as_mutable(JSON), default=list, nullable=False)
 
     def get_id(self) -> str:
         """Return the user's identifier in the string form used by the UML."""
