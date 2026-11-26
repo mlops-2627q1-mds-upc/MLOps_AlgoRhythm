@@ -3,7 +3,7 @@
 from typing import Any
 from uuid import UUID
 
-from src.domain.user import User
+from src.domain.user import User, UserRole
 
 
 class UserService:
@@ -14,6 +14,16 @@ class UserService:
         """Raise a PermissionError if the actor is not the owner of the target user."""
         if str(actor_id) != target_user.get_id():
             raise PermissionError("A user can only access or modify their own account.")
+        
+    @staticmethod
+    def ensure_owner_or_admin(target_user: User, actor: User) -> None:
+        if not actor.is_admin() and str(actor.get_id()) != target_user.get_id():
+            raise PermissionError("A user can only access or modify their own account.")
+
+    @staticmethod
+    def can_change_role(actor: User, new_role: UserRole | None) -> None:
+        if new_role is not None and not actor.is_admin():
+            raise PermissionError("Only admins can change user roles.")
 
     @staticmethod
     def add_song(

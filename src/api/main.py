@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from typing import Dict, Any
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, status, APIRouter
 from sqlalchemy.orm import Session
 import joblib
 from pydantic import BaseModel, Field
@@ -10,15 +10,23 @@ from src.config import MODELS_DIR
 
 from src.api.auth import get_current_user, get_admin_user
 from src.database import get_db
-from src.domain.user import User
+from src.domain.user import User, UserRole
 from src.domain import UserService
-
+from src.api.security import hash_password, verify_password, create_access_token
+from src.api.schemas import (
+    TokenResponse,
+    UserCreate,
+    UserLogin,
+    UserResponse,
+    UserUpdate,
+)
 # ------------------------------------------------------------------------------
 # 1. Variables globales y carga del modelo
 # ------------------------------------------------------------------------------
 MODEL_PATH = MODELS_DIR / "random_forest.pkl"
 model: Any = None
 
+router = APIRouter(tags=["Users & Auth"])
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -89,6 +97,87 @@ class PredictionOutput(BaseModel):
 
 
 # -------------- TEST AUTHORIZATION --------------
+
+@router.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def create_user(payload: UserCreate, db: Session = Depends(get_db)):
+    existing = db.query(User).filter(User.username == payload.username).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Username already registered.")
+
+    user = User(
+        username=payload.username,
+        hashed_password=hash_password(payload.password),  # tu función de hash
+        role=UserRole.USER,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+@router.post("/auth/login", response_model=TokenResponse)
+def sign_in(payload: UserLogin, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == payload.username).first()
+    if not user or not verify_password(payload.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password.",
+        )
+
+    token = create_access_token(subject=user.get_id())  # tu helper JWT
+    return TokenResponse(access_token=token)
+
+@router.patch("/users/{user_id}", response_model=UserResponse)
+def update_user(
+    user_id: int,
+    payload: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    target_user = db.query(User).filter(User.user_id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    try:
+        UserService.ensure_owner_or_admin(target_user, current_user)
+        UserService.can_change_role(current_user, payload.role)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+    if payload.username is not None and payload.username != target_user.username:
+        taken = db.query(User).filter(User.username == payload.username).first()
+        if taken:
+            raise HTTPException(status_code=400, detail="Username already taken.")
+        target_user.username = payload.username
+
+    if payload.password is not None:
+        target_user.hashed_password = hash_password(payload.password)
+
+    if payload.role is not None:
+        target_user.role = payload.role
+
+    db.commit()
+    db.refresh(target_user)
+    return target_user
+
+@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    target_user = db.query(User).filter(User.user_id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    try:
+        UserService.ensure_owner_or_admin(target_user, current_user)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+    db.delete(target_user)
+    db.commit()
+    return None
+
 
 @app.get("/public-endpoint")
 def function_public_endpoint():

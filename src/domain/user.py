@@ -4,6 +4,8 @@ from sqlalchemy.ext.mutable import MutableList
 from typing import Any
 
 from src.database import Base
+from src.domain.user import UserRole
+
 
 class UserRole(str, enum.Enum):
     ADMIN = "ADMIN"
