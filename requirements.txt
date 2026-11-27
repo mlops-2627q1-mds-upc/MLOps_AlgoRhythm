@@ -13,3 +13,9 @@ python-dotenv
 loguru
 typer
 tqdm
+
+sqlalchemy
+psycopg2-binary
+psycopg[binary]
+PyJWT
+pwdlib[argon2]

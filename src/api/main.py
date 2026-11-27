@@ -9,7 +9,7 @@ from loguru import logger
 from src.config import MODELS_DIR
 
 from src.api.auth import get_current_user, get_admin_user
-from src.database import get_db
+from src.database import get_db, init_db
 from src.domain.user import User, UserRole
 from src.domain import UserService
 from src.api.security import hash_password, verify_password, create_access_token
@@ -34,6 +34,8 @@ async def lifespan(app: FastAPI):
     Gestiona el ciclo de vida de la aplicación.
     Carga el modelo de 543MB en memoria al arrancar para evitar relecturas por petición.
     """
+    init_db()
+    
     global model
     logger.info(f"Cargando modelo pesado desde: {MODEL_PATH}")
     if not MODEL_PATH.exists():
@@ -60,6 +62,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+app.include_router(router)
 
 
 # ------------------------------------------------------------------------------
